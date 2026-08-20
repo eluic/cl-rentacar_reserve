@@ -212,6 +212,45 @@
                     refreshVehiclePricing(id);
                 });
             });
+
+            // Pricing inline edit
+            $(document).on('click', '.rca-edit-vp', function () {
+                var $row = $(this).closest('tr');
+                var pid = $row.data('id');
+                var df = $row.data('from');
+                var dt = $row.data('to');
+                var pr = $row.data('price');
+                var lb = $row.data('label');
+                $row.html(
+                    '<td><input type="date" class="rca-input" id="rca-ep-from-' + pid + '" value="' + df + '" style="font-size:12px;padding:4px 6px"></td>' +
+                    '<td><input class="rca-input" id="rca-ep-label-' + pid + '" value="' + esc(lb) + '" style="font-size:12px;padding:4px 6px"></td>' +
+                    '<td><div style="display:flex;align-items:center;gap:2px"><input type="number" class="rca-input" id="rca-ep-price-' + pid + '" value="' + pr + '" style="font-size:12px;padding:4px 6px;width:80px" min="0"><span style="font-size:11px;white-space:nowrap">/日</span></div>' +
+                    '<input type="date" class="rca-input" id="rca-ep-to-' + pid + '" value="' + dt + '" style="font-size:12px;padding:4px 6px;margin-top:4px"></td>' +
+                    '<td><button class="rca-btn rca-btn-sm rca-btn-primary rca-save-vp" data-id="' + pid + '" style="margin-right:4px">保存</button>' +
+                    '<button class="rca-btn rca-btn-sm rca-btn-secondary rca-cancel-vp">中止</button></td>'
+                );
+            });
+
+            // Pricing inline save
+            $(document).on('click', '.rca-save-vp', function () {
+                var pid = $(this).data('id');
+                var data = {
+                    date_from: $('#rca-ep-from-' + pid).val(),
+                    date_to: $('#rca-ep-to-' + pid).val(),
+                    price: parseInt($('#rca-ep-price-' + pid).val()),
+                    label: $('#rca-ep-label-' + pid).val()
+                };
+                if (!data.date_from || !data.date_to) { toast('日付を入力してください', true); return; }
+                api('PUT', '/admin/vehicles/' + id + '/prices/' + pid, data).done(function () {
+                    toast('更新しました');
+                    refreshVehiclePricing(id);
+                }).fail(function () { toast('更新に失敗しました', true); });
+            });
+
+            // Pricing inline cancel
+            $(document).on('click', '.rca-cancel-vp', function () {
+                refreshVehiclePricing(id);
+            });
         }
 
         function refreshVehiclePricing(vid) {
@@ -220,13 +259,15 @@
                     $('#rv-pricing-list').html('<p style="color:#999;text-align:center;padding:8px;font-size:13px">期間別料金はまだ設定されていません</p>');
                     return;
                 }
-                var t = '<div class="rca-table-wrap" style="font-size:13px"><table class="rca-table"><thead><tr><th>期間</th><th>ラベル</th><th>日額</th><th></th></tr></thead><tbody>';
+                var t = '<div class="rca-table-wrap" style="font-size:13px"><table class="rca-table"><thead><tr><th>期間</th><th>ラベル</th><th>日額</th><th style="width:120px"></th></tr></thead><tbody>';
                 items.forEach(function (p) {
                     var fromParts = p.date_from.split('-');
                     var toParts = p.date_to.split('-');
                     var period = parseInt(fromParts[1]) + '/' + parseInt(fromParts[2]) + ' ～ ' + parseInt(toParts[1]) + '/' + parseInt(toParts[2]);
-                    t += '<tr><td>' + period + '</td><td>' + esc(p.label) + '</td><td><strong>' + formatPrice(p.price) + '</strong>/日</td>' +
-                        '<td><button class="rca-btn rca-btn-sm rca-btn-danger rca-del-vp" data-id="' + p.id + '">削除</button></td></tr>';
+                    t += '<tr class="rca-vp-row" data-id="' + p.id + '" data-from="' + p.date_from + '" data-to="' + p.date_to + '" data-price="' + p.price + '" data-label="' + esc(p.label) + '">' +
+                        '<td>' + period + '</td><td>' + esc(p.label) + '</td><td><strong>' + formatPrice(p.price) + '</strong>/日</td>' +
+                        '<td><button class="rca-btn rca-btn-sm rca-btn-secondary rca-edit-vp" data-id="' + p.id + '" style="margin-right:4px">編集</button>' +
+                        '<button class="rca-btn rca-btn-sm rca-btn-danger rca-del-vp" data-id="' + p.id + '">削除</button></td></tr>';
                 });
                 t += '</tbody></table></div>';
                 $('#rv-pricing-list').html(t);

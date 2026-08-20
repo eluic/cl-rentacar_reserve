@@ -706,6 +706,20 @@ app.get('/api/rentacar/v1/admin/vehicles/:id/prices', (c) => {
 })
 app.post('/api/rentacar/v1/admin/vehicles/:id/prices', async (c) => c.json({ id: 99, success: true }))
 app.delete('/api/rentacar/v1/admin/vehicles/:vid/prices/:id', (c) => c.json({ success: true }))
+app.put('/api/rentacar/v1/admin/vehicles/:vid/prices/:id', async (c) => {
+  const vid = parseInt(c.req.param('vid'))
+  const pid = parseInt(c.req.param('id'))
+  const body = await c.req.json<{ date_from?: string; date_to?: string; price?: number; label?: string }>()
+  const list = mockVehiclePrices[vid]
+  if (!list) return c.json({ error: 'Vehicle not found' }, 404)
+  const idx = list.findIndex(p => p.id === pid)
+  if (idx === -1) return c.json({ error: 'Price not found' }, 404)
+  if (body.date_from) list[idx].date_from = body.date_from
+  if (body.date_to) list[idx].date_to = body.date_to
+  if (body.price !== undefined) list[idx].price = body.price
+  if (body.label !== undefined) list[idx].label = body.label
+  return c.json({ ...list[idx], success: true })
+})
 
 // Admin Vehicle Blocks (maintenance)
 app.get('/api/rentacar/v1/admin/vehicles/:id/blocks', (c) => {
