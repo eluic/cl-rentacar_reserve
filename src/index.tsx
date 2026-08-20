@@ -572,4 +572,339 @@ app.get('/cancel', (c) => {
 </html>`)
 })
 
+/* ═══════════════════════════════════════════════════════
+   Admin Mock API Endpoints
+   ═══════════════════════════════════════════════════════ */
+
+// Mock reservations data
+const mockReservations = [
+  { id: 1, reservation_code: 'RC-ABC12345', customer_name: '山田 太郎', customer_kana: 'ヤマダ タロウ', customer_email: 'yamada@example.com', customer_tel: '090-1234-5678', customer_zip: '900-0001', customer_address: '沖縄県那覇市首里1-1-1', license_no: '012345678901', vehicle_id: 2, vehicle_name: 'トヨタ ヴィッツ (コンパクト)', pickup_at: '2026-08-25 09:00', return_at: '2026-08-27 17:00', total_amount: 13200, status: 'confirmed', payment_status: 'paid', note: '' },
+  { id: 2, reservation_code: 'RC-DEF67890', customer_name: '佐藤 花子', customer_kana: 'サトウ ハナコ', customer_email: 'sato@example.com', customer_tel: '080-9876-5432', customer_zip: '901-0155', customer_address: '沖縄県那覇市金城3-2-1', license_no: '987654321012', vehicle_id: 4, vehicle_name: 'トヨタ ノア (ワゴン)', pickup_at: '2026-08-20 10:00', return_at: '2026-08-23 18:00', total_amount: 30800, status: 'confirmed', payment_status: 'pending_onsite', note: 'チャイルドシート1台' },
+  { id: 3, reservation_code: 'RC-GHI11223', customer_name: '田中 一郎', customer_kana: 'タナカ イチロウ', customer_email: 'tanaka@example.com', customer_tel: '070-5555-1234', customer_zip: '904-0004', customer_address: '沖縄県沖縄市中央2-10-5', license_no: '111223344556', vehicle_id: 1, vehicle_name: 'ダイハツ ミラ (軽)', pickup_at: '2026-08-22 08:00', return_at: '2026-08-22 20:00', total_amount: 3300, status: 'pending', payment_status: 'unpaid', note: '' },
+  { id: 4, reservation_code: 'RC-JKL44556', customer_name: '鈴木 美咲', customer_kana: 'スズキ ミサキ', customer_email: 'suzuki@example.com', customer_tel: '090-3333-4444', customer_zip: '905-0012', customer_address: '沖縄県名護市名護4567', license_no: '445566778899', vehicle_id: 3, vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-09-01 09:00', return_at: '2026-09-05 17:00', total_amount: 26400, status: 'confirmed', payment_status: 'paid', note: 'WiFiルーター希望' },
+  { id: 5, reservation_code: 'RC-MNO77889', customer_name: '高橋 健太', customer_kana: 'タカハシ ケンタ', customer_email: 'takahashi@example.com', customer_tel: '080-1111-2222', customer_zip: '900-0015', customer_address: '沖縄県那覇市久茂地1-2-3', license_no: '778899001122', vehicle_id: 6, vehicle_name: 'スズキ ジムニー (SUV)', pickup_at: '2026-08-18 10:00', return_at: '2026-08-20 17:00', total_amount: 15400, status: 'completed', payment_status: 'paid', note: '' },
+  { id: 6, reservation_code: 'RC-PQR99001', customer_name: '伊藤 さくら', customer_kana: 'イトウ サクラ', customer_email: 'ito@example.com', customer_tel: '070-7777-8888', customer_zip: '901-2224', customer_address: '沖縄県宜野湾市真志喜2-8-1', license_no: '990011223344', vehicle_id: 5, vehicle_name: 'ニッサン セレナ (ミニバン)', pickup_at: '2026-08-15 09:00', return_at: '2026-08-16 18:00', total_amount: 11000, status: 'cancelled', payment_status: 'refunded', note: '台風のためキャンセル' },
+  { id: 7, reservation_code: 'RC-STU22334', customer_name: '渡辺 翔太', customer_kana: 'ワタナベ ショウタ', customer_email: 'watanabe@example.com', customer_tel: '090-6666-7777', customer_zip: '903-0804', customer_address: '沖縄県那覇市首里石嶺町4-1-1', license_no: '223344556677', vehicle_id: 2, vehicle_name: 'トヨタ ヴィッツ (コンパクト)', pickup_at: '2026-09-10 10:00', return_at: '2026-09-12 17:00', total_amount: 8800, status: 'confirmed', payment_status: 'unpaid', note: '' },
+  { id: 8, reservation_code: 'RC-VWX55667', customer_name: '中村 優子', customer_kana: 'ナカムラ ユウコ', customer_email: 'nakamura@example.com', customer_tel: '080-4444-5555', customer_zip: '900-0033', customer_address: '沖縄県那覇市久米2-3-4', license_no: '556677889900', vehicle_id: 3, vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-08-20 09:00', return_at: '2026-08-21 17:00', total_amount: 6600, status: 'confirmed', payment_status: 'paid', note: 'ETC希望' },
+]
+
+const mockPayments = [
+  { id: 1, reservation_code: 'RC-ABC12345', customer_name: '山田 太郎', gateway: 'square', amount: 13200, status: 'paid', created_at: '2026-08-18 14:30' },
+  { id: 2, reservation_code: 'RC-DEF67890', customer_name: '佐藤 花子', gateway: 'onsite', amount: 30800, status: 'pending_onsite', created_at: '2026-08-19 10:15' },
+  { id: 3, reservation_code: 'RC-JKL44556', customer_name: '鈴木 美咲', gateway: 'square', amount: 26400, status: 'paid', created_at: '2026-08-20 09:00' },
+  { id: 4, reservation_code: 'RC-MNO77889', customer_name: '高橋 健太', gateway: 'onsite', amount: 15400, status: 'paid', created_at: '2026-08-18 10:00' },
+  { id: 5, reservation_code: 'RC-PQR99001', customer_name: '伊藤 さくら', gateway: 'square', amount: 11000, status: 'refunded', created_at: '2026-08-15 09:30' },
+  { id: 6, reservation_code: 'RC-STU22334', customer_name: '渡辺 翔太', gateway: 'onsite', amount: 8800, status: 'unpaid', created_at: '2026-08-20 16:00' },
+  { id: 7, reservation_code: 'RC-VWX55667', customer_name: '中村 優子', gateway: 'square', amount: 6600, status: 'paid', created_at: '2026-08-20 08:45' },
+]
+
+const mockMailTemplates = [
+  { id: 1, template_key: 'applicant_created', subject: '【CLレンタカー】ご予約を受け付けました', to_type: 'applicant', enabled: 1, body: '{customer_name} 様\n\nこの度はCLレンタカーをご予約いただきありがとうございます。\n\n■ 予約番号: {reservation_code}\n■ 車両: {vehicle_name}\n■ 貸出日時: {pickup_at}\n■ 返却日時: {return_at}\n■ 合計金額: {total_amount}\n\nキャンセルはこちら: {cancel_url}\n\n{store_name}\nTEL: {store_tel}' },
+  { id: 2, template_key: 'admin_created', subject: '【管理】新規予約: {reservation_code}', to_type: 'admin', enabled: 1, body: '新しい予約が入りました。\n\n予約番号: {reservation_code}\nお客様: {customer_name}\n車両: {vehicle_name}\n期間: {pickup_at} 〜 {return_at}\n金額: {total_amount}' },
+  { id: 3, template_key: 'applicant_paid', subject: '【CLレンタカー】お支払いが確認されました', to_type: 'applicant', enabled: 1, body: '{customer_name} 様\n\nお支払いの確認ができました。\n予約番号: {reservation_code}\n金額: {total_amount}\n\n当日お待ちしております。' },
+  { id: 4, template_key: 'applicant_refunded', subject: '【CLレンタカー】返金処理のお知らせ', to_type: 'applicant', enabled: 1, body: '{customer_name} 様\n\n返金処理が完了しました。\n予約番号: {reservation_code}\n返金額: {total_amount}' },
+  { id: 5, template_key: 'applicant_cancelled', subject: '【CLレンタカー】予約キャンセル完了', to_type: 'applicant', enabled: 1, body: '{customer_name} 様\n\nご予約のキャンセルが完了しました。\n予約番号: {reservation_code}\n\nまたのご利用をお待ちしております。' },
+  { id: 6, template_key: 'admin_cancelled', subject: '【管理】予約キャンセル: {reservation_code}', to_type: 'admin', enabled: 1, body: '予約がキャンセルされました。\n\n予約番号: {reservation_code}\nお客様: {customer_name}' },
+  { id: 7, template_key: 'reminder_pickup', subject: '【CLレンタカー】明日ご利用予定のご案内', to_type: 'applicant', enabled: 1, body: '{customer_name} 様\n\n明日のレンタカーご利用予定のご案内です。\n\n予約番号: {reservation_code}\n車両: {vehicle_name}\n貸出日時: {pickup_at}\n\n{store_name}\n{store_address}\nTEL: {store_tel}' },
+]
+
+const mockMailLogs = [
+  { id: 1, template_key: 'applicant_created', to_address: 'yamada@example.com', subject: '【CLレンタカー】ご予約を受け付けました', status: 'sent', retry_count: 0, sent_at: '2026-08-18 14:31' },
+  { id: 2, template_key: 'admin_created', to_address: 'admin@cl-rentacar.com', subject: '【管理】新規予約: RC-ABC12345', status: 'sent', retry_count: 0, sent_at: '2026-08-18 14:31' },
+  { id: 3, template_key: 'applicant_paid', to_address: 'yamada@example.com', subject: '【CLレンタカー】お支払いが確認されました', status: 'sent', retry_count: 0, sent_at: '2026-08-18 14:35' },
+  { id: 4, template_key: 'applicant_created', to_address: 'sato@example.com', subject: '【CLレンタカー】ご予約を受け付けました', status: 'sent', retry_count: 0, sent_at: '2026-08-19 10:16' },
+  { id: 5, template_key: 'applicant_cancelled', to_address: 'ito@example.com', subject: '【CLレンタカー】予約キャンセル完了', status: 'sent', retry_count: 0, sent_at: '2026-08-15 11:00' },
+  { id: 6, template_key: 'reminder_pickup', to_address: 'tanaka@example.com', subject: '【CLレンタカー】明日ご利用予定のご案内', status: 'failed', retry_count: 3, sent_at: null },
+  { id: 7, template_key: 'applicant_created', to_address: 'nakamura@example.com', subject: '【CLレンタカー】ご予約を受け付けました', status: 'sent', retry_count: 0, sent_at: '2026-08-20 08:50' },
+]
+
+const mockPrices = [
+  { id: 1, vehicle_id: 1, price_type: 'base', label: '通常料金', amount: 3300, date_from: null, date_to: null },
+  { id: 2, vehicle_id: 2, price_type: 'base', label: '通常料金', amount: 4400, date_from: null, date_to: null },
+  { id: 3, vehicle_id: 3, price_type: 'base', label: '通常料金', amount: 5500, date_from: null, date_to: null },
+  { id: 4, vehicle_id: 4, price_type: 'base', label: '通常料金', amount: 8800, date_from: null, date_to: null },
+  { id: 5, vehicle_id: 5, price_type: 'base', label: '通常料金', amount: 9900, date_from: null, date_to: null },
+  { id: 6, vehicle_id: 6, price_type: 'base', label: '通常料金', amount: 6600, date_from: null, date_to: null },
+  { id: 7, vehicle_id: 1, price_type: 'season', label: 'ハイシーズン（7-8月）', amount: 4400, date_from: '2026-07-01', date_to: '2026-08-31' },
+  { id: 8, vehicle_id: 2, price_type: 'season', label: 'ハイシーズン（7-8月）', amount: 5500, date_from: '2026-07-01', date_to: '2026-08-31' },
+]
+
+const mockHolidays = [
+  { id: 1, date: '2026-09-07', label: '定休日', vehicle_id: 0 },
+  { id: 2, date: '2026-09-14', label: '定休日', vehicle_id: 0 },
+  { id: 3, date: '2026-09-21', label: '定休日', vehicle_id: 0 },
+  { id: 4, date: '2026-09-28', label: '定休日', vehicle_id: 0 },
+  { id: 5, date: '2026-12-31', label: '年末休業', vehicle_id: 0 },
+  { id: 6, date: '2027-01-01', label: '年始休業', vehicle_id: 0 },
+  { id: 7, date: '2027-01-02', label: '年始休業', vehicle_id: 0 },
+]
+
+// Dashboard
+app.get('/api/rentacar/v1/admin/reservations/dashboard', (c) => {
+  return c.json({
+    month_count: 8, month_sales: 115500, pending_count: 1, vehicle_count: 6,
+    today_pickups: [
+      { reservation_code: 'RC-DEF67890', customer_name: '佐藤 花子', vehicle_name: 'トヨタ ノア (ワゴン)', pickup_at: '2026-08-20 10:00' },
+      { reservation_code: 'RC-VWX55667', customer_name: '中村 優子', vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-08-20 09:00' },
+    ],
+    today_returns: [
+      { reservation_code: 'RC-MNO77889', customer_name: '高橋 健太', vehicle_name: 'スズキ ジムニー (SUV)', return_at: '2026-08-20 17:00' },
+    ]
+  })
+})
+
+// Admin Vehicles
+app.get('/api/rentacar/v1/admin/vehicles', (c) => {
+  return c.json({ items: vehicles.map(v => ({ ...v, stock: 2, slug: v.name.toLowerCase().replace(/\s/g, '-'), description: '', meta: { seats: v.seats, transmission: v.transmission, vehicle_class: '' }, thumbnail_id: 0 })) })
+})
+app.get('/api/rentacar/v1/admin/vehicles/:id', (c) => {
+  const id = parseInt(c.req.param('id'))
+  const v = vehicles.find(x => x.id === id)
+  if (!v) return c.json({ error: 'Not found' }, 404)
+  return c.json({ ...v, stock: 2, slug: v.name.toLowerCase().replace(/\s/g, '-'), description: '', meta: { seats: v.seats, transmission: v.transmission, vehicle_class: '' }, thumbnail_id: 0 })
+})
+app.post('/api/rentacar/v1/admin/vehicles', async (c) => { return c.json({ id: 7, success: true }) })
+app.put('/api/rentacar/v1/admin/vehicles/:id', async (c) => { return c.json({ success: true }) })
+app.delete('/api/rentacar/v1/admin/vehicles/:id', (c) => { return c.json({ success: true }) })
+
+// Admin Reservations
+app.get('/api/rentacar/v1/admin/reservations', (c) => {
+  const status = c.req.query('status')
+  const search = c.req.query('search')
+  let items = [...mockReservations]
+  if (status) items = items.filter(r => r.status === status)
+  if (search) items = items.filter(r => r.customer_name.includes(search) || r.customer_email.includes(search) || r.reservation_code.includes(search))
+  return c.json({ items, total: items.length })
+})
+app.get('/api/rentacar/v1/admin/reservations/:id', (c) => {
+  const id = parseInt(c.req.param('id'))
+  const r = mockReservations.find(x => x.id === id)
+  if (!r) return c.json({ error: 'Not found' }, 404)
+  return c.json(r)
+})
+app.put('/api/rentacar/v1/admin/reservations/:id', async (c) => { return c.json({ success: true }) })
+
+// Admin Prices
+app.get('/api/rentacar/v1/admin/prices', (c) => c.json(mockPrices))
+app.post('/api/rentacar/v1/admin/prices', async (c) => c.json({ id: 9, success: true }))
+app.delete('/api/rentacar/v1/admin/prices/:id', (c) => c.json({ success: true }))
+
+// Admin Options
+app.get('/api/rentacar/v1/admin/options', (c) => {
+  return c.json(options.map(o => ({ ...o, status: 'published' })))
+})
+app.post('/api/rentacar/v1/admin/options', async (c) => c.json({ id: 8, success: true }))
+app.delete('/api/rentacar/v1/admin/options/:id', (c) => c.json({ success: true }))
+
+// Admin Slots
+app.get('/api/rentacar/v1/admin/slots', (c) => {
+  const vehicleId = parseInt(c.req.query('vehicle_id') || '1')
+  const from = c.req.query('from') || '2026-08-20'
+  const to = c.req.query('to') || '2026-09-20'
+  const days: Record<string, { capacity: number; booked: number; available: number; status: string }> = {}
+  const startD = new Date(from)
+  const endD = new Date(to)
+  for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
+    const ds = d.toISOString().split('T')[0]
+    const seed = (d.getDate() * 7 + vehicleId * 13 + (d.getMonth() + 1) * 3) % 10
+    if (d.getDay() === 0) {
+      days[ds] = { capacity: 2, booked: 0, available: 0, status: 'holiday' }
+    } else if (seed < 5) {
+      days[ds] = { capacity: 2, booked: 0, available: 2, status: 'available' }
+    } else if (seed < 8) {
+      days[ds] = { capacity: 2, booked: 1, available: 1, status: 'few' }
+    } else {
+      days[ds] = { capacity: 2, booked: 2, available: 0, status: 'full' }
+    }
+  }
+  return c.json({ vehicle_id: vehicleId, days })
+})
+app.post('/api/rentacar/v1/admin/slots/bulk', async (c) => c.json({ count: 30, success: true }))
+
+// Admin Holidays
+app.get('/api/rentacar/v1/admin/holidays', (c) => c.json(mockHolidays))
+app.post('/api/rentacar/v1/admin/holidays', async (c) => c.json({ id: 8, success: true }))
+app.delete('/api/rentacar/v1/admin/holidays/:id', (c) => c.json({ success: true }))
+
+// Admin Payments
+app.get('/api/rentacar/v1/admin/payments', (c) => c.json({ items: mockPayments, total: mockPayments.length }))
+
+// Admin Mail Templates
+app.get('/api/rentacar/v1/admin/mail-templates', (c) => c.json(mockMailTemplates))
+app.get('/api/rentacar/v1/admin/mail-templates/:id', (c) => {
+  const id = parseInt(c.req.param('id'))
+  const t = mockMailTemplates.find(x => x.id === id)
+  if (!t) return c.json({ error: 'Not found' }, 404)
+  return c.json(t)
+})
+app.put('/api/rentacar/v1/admin/mail-templates/:id', async (c) => c.json({ success: true }))
+
+// Admin Mail Logs
+app.get('/api/rentacar/v1/admin/mail-logs', (c) => c.json({ items: mockMailLogs, total: mockMailLogs.length }))
+app.post('/api/rentacar/v1/admin/mail-logs/:id/resend', (c) => c.json({ success: true }))
+
+// Admin Settings
+app.get('/api/rentacar/v1/admin/settings', (c) => c.json({
+  store_name: 'CLレンタカー', store_tel: '098-123-4567', store_email: 'info@cl-rentacar.com',
+  store_address: '沖縄県那覇市おもろまち1-2-3', business_hours_start: '08:00', business_hours_end: '20:00',
+  recaptcha_site_key: '', recaptcha_secret_key: '', recaptcha_score: '0.5',
+  payment_onsite_enabled: '1', payment_square_enabled: '0',
+  square_application_id: '', square_location_id: '', square_access_token_set: false, square_sandbox_mode: '1',
+  rate_limit_per_minute: '10'
+}))
+app.post('/api/rentacar/v1/admin/settings', async (c) => c.json({ success: true }))
+app.post('/api/rentacar/v1/admin/settings/test-mail', async (c) => c.json({ success: true }))
+
+// Admin System Info
+app.get('/api/rentacar/v1/admin/settings/system', (c) => c.json({
+  php_version: '8.2.20', wp_version: '6.6.1', plugin_version: '1.0.0', db_version: '1.0.0',
+  timezone: 'Asia/Tokyo', memory_limit: '256M', upload_max: '64M', openssl: true,
+  tables: [
+    { name: 'rc_vehicles', rows: 6 }, { name: 'rc_vehicle_meta', rows: 12 },
+    { name: 'rc_reservations', rows: 8 }, { name: 'rc_reservation_options', rows: 5 },
+    { name: 'rc_prices', rows: 8 }, { name: 'rc_options', rows: 7 },
+    { name: 'rc_slots', rows: 180 }, { name: 'rc_holidays', rows: 7 },
+    { name: 'rc_payments', rows: 7 }, { name: 'rc_refunds', rows: 1 },
+    { name: 'rc_mail_templates', rows: 7 }, { name: 'rc_mail_logs', rows: 7 },
+    { name: 'rc_settings', rows: 15 },
+  ]
+}))
+
+/* ═══════════════════════════════════════════════════════
+   Admin HTML Pages
+   ═══════════════════════════════════════════════════════ */
+
+const adminMenuItems = [
+  { key: 'dashboard', icon: '📊', label: 'ダッシュボード' },
+  { key: 'reservations', icon: '📋', label: '予約管理' },
+  { key: 'vehicles', icon: '🚗', label: '車両管理' },
+  { key: 'prices', icon: '💰', label: '料金プラン' },
+  { key: 'options', icon: '🛡️', label: 'オプション' },
+  { key: 'slots', icon: '📅', label: '在庫カレンダー' },
+  { key: 'holidays', icon: '🏖️', label: '休業日' },
+  { key: 'payments', icon: '💳', label: '決済履歴' },
+  { key: 'mail-templates', icon: '✉️', label: 'メールテンプレート' },
+  { key: 'mail-logs', icon: '📨', label: 'メール送信ログ' },
+  { key: 'settings', icon: '⚙️', label: '設定' },
+  { key: 'system', icon: '🖥️', label: 'システム情報' },
+]
+
+function adminPage(pageKey: string) {
+  const currentItem = adminMenuItems.find(m => m.key === pageKey) || adminMenuItems[0]
+
+  const sidebar = adminMenuItems.map(m => {
+    const active = m.key === pageKey
+    return `<a href="/admin/${m.key}" class="admin-menu-item${active ? ' active' : ''}">
+      <span class="admin-menu-icon">${m.icon}</span><span class="admin-menu-text">${m.label}</span>
+    </a>`
+  }).join('')
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${currentItem.label} — CL Rentacar 管理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Noto Sans JP","Hiragino Sans",sans-serif; background: #f0f2f5; color: #333; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .admin-sidebar { width: 240px; background: #1e293b; color: #cbd5e1; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s; }
+    .admin-sidebar-header { padding: 20px 16px; border-bottom: 1px solid #334155; }
+    .admin-sidebar-brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; }
+    .admin-sidebar-brand-icon { font-size: 24px; }
+    .admin-sidebar-brand-text { font-size: 16px; font-weight: 700; }
+    .admin-sidebar-brand-sub { font-size: 10px; color: #94a3b8; display: block; }
+    .admin-sidebar-nav { padding: 8px 0; }
+    .admin-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #cbd5e1; text-decoration: none; transition: all 0.2s; font-size: 13px; border-left: 3px solid transparent; }
+    .admin-menu-item:hover { background: #334155; color: #fff; }
+    .admin-menu-item.active { background: #0097a7; color: #fff; border-left-color: #00bcd4; }
+    .admin-menu-icon { font-size: 16px; width: 22px; text-align: center; }
+    .admin-menu-text { font-weight: 500; }
+    .admin-main { margin-left: 240px; flex: 1; min-height: 100vh; }
+    .admin-topbar { background: #fff; padding: 12px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .admin-topbar-title { font-size: 18px; font-weight: 700; color: #1e293b; }
+    .admin-topbar-right { display: flex; align-items: center; gap: 12px; }
+    .admin-topbar-badge { background: #00bcd4; color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .admin-topbar-link { color: #64748b; text-decoration: none; font-size: 13px; transition: color 0.2s; }
+    .admin-topbar-link:hover { color: #00bcd4; }
+    .admin-content { padding: 24px; }
+    .admin-content .rc-admin-wrap { max-width: 100%; }
+    .admin-mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; color: #333; }
+    @media (max-width: 768px) {
+      .admin-sidebar { transform: translateX(-100%); }
+      .admin-sidebar.open { transform: translateX(0); }
+      .admin-main { margin-left: 0; }
+      .admin-mobile-toggle { display: block; }
+      .admin-sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 99; }
+      .admin-sidebar-overlay.open { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="admin-sidebar-overlay" id="sidebar-overlay" onclick="document.getElementById('admin-sidebar').classList.remove('open');this.classList.remove('open');"></div>
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <a href="/admin/dashboard" class="admin-sidebar-brand">
+          <span class="admin-sidebar-brand-icon">🚗</span>
+          <div>
+            <span class="admin-sidebar-brand-text">CL Rentacar</span>
+            <span class="admin-sidebar-brand-sub">管理画面プレビュー</span>
+          </div>
+        </a>
+      </div>
+      <nav class="admin-sidebar-nav">
+        ${sidebar}
+        <div style="border-top:1px solid #334155;margin:8px 0;"></div>
+        <a href="/" class="admin-menu-item"><span class="admin-menu-icon">🌐</span><span class="admin-menu-text">フロント表示</span></a>
+        <a href="/booking" class="admin-menu-item"><span class="admin-menu-icon">📝</span><span class="admin-menu-text">予約フォーム</span></a>
+      </nav>
+    </aside>
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="admin-mobile-toggle" onclick="document.getElementById('admin-sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');">☰</button>
+          <span class="admin-topbar-title">${currentItem.icon} ${currentItem.label}</span>
+        </div>
+        <div class="admin-topbar-right">
+          <span class="admin-topbar-badge">DEMO</span>
+          <a href="/" class="admin-topbar-link">🌐 サイト表示</a>
+        </div>
+      </header>
+      <div class="admin-content">
+        <div class="rc-admin-wrap" id="rc-admin-app" data-page="${pageKey}">
+          <div class="rc-loading">読み込み中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var rcAdminData = {
+      restUrl: '/api/rentacar/v1',
+      nonce: 'preview-nonce'
+    };
+  </script>
+  <script src="/static/admin.js"></script>
+</body>
+</html>`
+}
+
+// Register all admin routes
+adminMenuItems.forEach(item => {
+  app.get(`/admin/${item.key}`, (c) => c.html(adminPage(item.key)))
+})
+// Redirect /admin to /admin/dashboard
+app.get('/admin', (c) => c.redirect('/admin/dashboard'))
+
+// Favicon (suppress 404)
+app.get('/favicon.ico', (c) => {
+  return new Response(null, { status: 204 })
+})
+
 export default app
