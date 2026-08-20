@@ -576,26 +576,52 @@ app.get('/cancel', (c) => {
    Admin Mock API Endpoints
    ═══════════════════════════════════════════════════════ */
 
-// Mock reservations data
+// Mock reservations data (no payment_status)
 const mockReservations = [
-  { id: 1, reservation_code: 'RC-ABC12345', customer_name: '山田 太郎', customer_kana: 'ヤマダ タロウ', customer_email: 'yamada@example.com', customer_tel: '090-1234-5678', customer_zip: '900-0001', customer_address: '沖縄県那覇市首里1-1-1', license_no: '012345678901', vehicle_id: 2, vehicle_name: 'トヨタ ヴィッツ (コンパクト)', pickup_at: '2026-08-25 09:00', return_at: '2026-08-27 17:00', total_amount: 13200, status: 'confirmed', payment_status: 'paid', note: '' },
-  { id: 2, reservation_code: 'RC-DEF67890', customer_name: '佐藤 花子', customer_kana: 'サトウ ハナコ', customer_email: 'sato@example.com', customer_tel: '080-9876-5432', customer_zip: '901-0155', customer_address: '沖縄県那覇市金城3-2-1', license_no: '987654321012', vehicle_id: 4, vehicle_name: 'トヨタ ノア (ワゴン)', pickup_at: '2026-08-20 10:00', return_at: '2026-08-23 18:00', total_amount: 30800, status: 'confirmed', payment_status: 'pending_onsite', note: 'チャイルドシート1台' },
-  { id: 3, reservation_code: 'RC-GHI11223', customer_name: '田中 一郎', customer_kana: 'タナカ イチロウ', customer_email: 'tanaka@example.com', customer_tel: '070-5555-1234', customer_zip: '904-0004', customer_address: '沖縄県沖縄市中央2-10-5', license_no: '111223344556', vehicle_id: 1, vehicle_name: 'ダイハツ ミラ (軽)', pickup_at: '2026-08-22 08:00', return_at: '2026-08-22 20:00', total_amount: 3300, status: 'pending', payment_status: 'unpaid', note: '' },
-  { id: 4, reservation_code: 'RC-JKL44556', customer_name: '鈴木 美咲', customer_kana: 'スズキ ミサキ', customer_email: 'suzuki@example.com', customer_tel: '090-3333-4444', customer_zip: '905-0012', customer_address: '沖縄県名護市名護4567', license_no: '445566778899', vehicle_id: 3, vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-09-01 09:00', return_at: '2026-09-05 17:00', total_amount: 26400, status: 'confirmed', payment_status: 'paid', note: 'WiFiルーター希望' },
-  { id: 5, reservation_code: 'RC-MNO77889', customer_name: '高橋 健太', customer_kana: 'タカハシ ケンタ', customer_email: 'takahashi@example.com', customer_tel: '080-1111-2222', customer_zip: '900-0015', customer_address: '沖縄県那覇市久茂地1-2-3', license_no: '778899001122', vehicle_id: 6, vehicle_name: 'スズキ ジムニー (SUV)', pickup_at: '2026-08-18 10:00', return_at: '2026-08-20 17:00', total_amount: 15400, status: 'completed', payment_status: 'paid', note: '' },
-  { id: 6, reservation_code: 'RC-PQR99001', customer_name: '伊藤 さくら', customer_kana: 'イトウ サクラ', customer_email: 'ito@example.com', customer_tel: '070-7777-8888', customer_zip: '901-2224', customer_address: '沖縄県宜野湾市真志喜2-8-1', license_no: '990011223344', vehicle_id: 5, vehicle_name: 'ニッサン セレナ (ミニバン)', pickup_at: '2026-08-15 09:00', return_at: '2026-08-16 18:00', total_amount: 11000, status: 'cancelled', payment_status: 'refunded', note: '台風のためキャンセル' },
-  { id: 7, reservation_code: 'RC-STU22334', customer_name: '渡辺 翔太', customer_kana: 'ワタナベ ショウタ', customer_email: 'watanabe@example.com', customer_tel: '090-6666-7777', customer_zip: '903-0804', customer_address: '沖縄県那覇市首里石嶺町4-1-1', license_no: '223344556677', vehicle_id: 2, vehicle_name: 'トヨタ ヴィッツ (コンパクト)', pickup_at: '2026-09-10 10:00', return_at: '2026-09-12 17:00', total_amount: 8800, status: 'confirmed', payment_status: 'unpaid', note: '' },
-  { id: 8, reservation_code: 'RC-VWX55667', customer_name: '中村 優子', customer_kana: 'ナカムラ ユウコ', customer_email: 'nakamura@example.com', customer_tel: '080-4444-5555', customer_zip: '900-0033', customer_address: '沖縄県那覇市久米2-3-4', license_no: '556677889900', vehicle_id: 3, vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-08-20 09:00', return_at: '2026-08-21 17:00', total_amount: 6600, status: 'confirmed', payment_status: 'paid', note: 'ETC希望' },
+  { id: 1, reservation_code: 'RC-ABC12345', customer_name: '山田 太郎', customer_kana: 'ヤマダ タロウ', customer_email: 'yamada@example.com', customer_tel: '090-1234-5678', customer_zip: '900-0001', customer_address: '沖縄県那覇市首里1-1-1', license_no: '012345678901', vehicle_id: 2, vehicle_name: 'トヨタ ヴィッツ (コンパクト)', pickup_at: '2026-08-25 09:00', return_at: '2026-08-27 17:00', total_amount: 13200, status: 'confirmed', note: '' },
+  { id: 2, reservation_code: 'RC-DEF67890', customer_name: '佐藤 花子', customer_kana: 'サトウ ハナコ', customer_email: 'sato@example.com', customer_tel: '080-9876-5432', customer_zip: '901-0155', customer_address: '沖縄県那覇市金城3-2-1', license_no: '987654321012', vehicle_id: 4, vehicle_name: 'トヨタ ノア (ワゴン)', pickup_at: '2026-08-20 10:00', return_at: '2026-08-23 18:00', total_amount: 30800, status: 'confirmed', note: 'チャイルドシート1台' },
+  { id: 3, reservation_code: 'RC-GHI11223', customer_name: '田中 一郎', customer_kana: 'タナカ イチロウ', customer_email: 'tanaka@example.com', customer_tel: '070-5555-1234', customer_zip: '904-0004', customer_address: '沖縄県沖縄市中央2-10-5', license_no: '111223344556', vehicle_id: 1, vehicle_name: 'ダイハツ ミラ (軽)', pickup_at: '2026-08-22 08:00', return_at: '2026-08-22 20:00', total_amount: 3300, status: 'pending', note: '' },
+  { id: 4, reservation_code: 'RC-JKL44556', customer_name: '鈴木 美咲', customer_kana: 'スズキ ミサキ', customer_email: 'suzuki@example.com', customer_tel: '090-3333-4444', customer_zip: '905-0012', customer_address: '沖縄県名護市名護4567', license_no: '445566778899', vehicle_id: 3, vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-09-01 09:00', return_at: '2026-09-05 17:00', total_amount: 26400, status: 'confirmed', note: 'WiFiルーター希望' },
+  { id: 5, reservation_code: 'RC-MNO77889', customer_name: '高橋 健太', customer_kana: 'タカハシ ケンタ', customer_email: 'takahashi@example.com', customer_tel: '080-1111-2222', customer_zip: '900-0015', customer_address: '沖縄県那覇市久茂地1-2-3', license_no: '778899001122', vehicle_id: 6, vehicle_name: 'スズキ ジムニー (SUV)', pickup_at: '2026-08-18 10:00', return_at: '2026-08-20 17:00', total_amount: 15400, status: 'completed', note: '' },
+  { id: 6, reservation_code: 'RC-PQR99001', customer_name: '伊藤 さくら', customer_kana: 'イトウ サクラ', customer_email: 'ito@example.com', customer_tel: '070-7777-8888', customer_zip: '901-2224', customer_address: '沖縄県宜野湾市真志喜2-8-1', license_no: '990011223344', vehicle_id: 5, vehicle_name: 'ニッサン セレナ (ミニバン)', pickup_at: '2026-08-15 09:00', return_at: '2026-08-16 18:00', total_amount: 11000, status: 'cancelled', note: '台風のためキャンセル' },
+  { id: 7, reservation_code: 'RC-STU22334', customer_name: '渡辺 翔太', customer_kana: 'ワタナベ ショウタ', customer_email: 'watanabe@example.com', customer_tel: '090-6666-7777', customer_zip: '903-0804', customer_address: '沖縄県那覇市首里石嶺町4-1-1', license_no: '223344556677', vehicle_id: 2, vehicle_name: 'トヨタ ヴィッツ (コンパクト)', pickup_at: '2026-09-10 10:00', return_at: '2026-09-12 17:00', total_amount: 8800, status: 'confirmed', note: '' },
+  { id: 8, reservation_code: 'RC-VWX55667', customer_name: '中村 優子', customer_kana: 'ナカムラ ユウコ', customer_email: 'nakamura@example.com', customer_tel: '080-4444-5555', customer_zip: '900-0033', customer_address: '沖縄県那覇市久米2-3-4', license_no: '556677889900', vehicle_id: 3, vehicle_name: 'トヨタ アクア (ハイブリッド)', pickup_at: '2026-08-20 09:00', return_at: '2026-08-21 17:00', total_amount: 6600, status: 'confirmed', note: 'ETC希望' },
 ]
 
-const mockPayments = [
-  { id: 1, reservation_code: 'RC-ABC12345', customer_name: '山田 太郎', gateway: 'square', amount: 13200, status: 'paid', created_at: '2026-08-18 14:30' },
-  { id: 2, reservation_code: 'RC-DEF67890', customer_name: '佐藤 花子', gateway: 'onsite', amount: 30800, status: 'pending_onsite', created_at: '2026-08-19 10:15' },
-  { id: 3, reservation_code: 'RC-JKL44556', customer_name: '鈴木 美咲', gateway: 'square', amount: 26400, status: 'paid', created_at: '2026-08-20 09:00' },
-  { id: 4, reservation_code: 'RC-MNO77889', customer_name: '高橋 健太', gateway: 'onsite', amount: 15400, status: 'paid', created_at: '2026-08-18 10:00' },
-  { id: 5, reservation_code: 'RC-PQR99001', customer_name: '伊藤 さくら', gateway: 'square', amount: 11000, status: 'refunded', created_at: '2026-08-15 09:30' },
-  { id: 6, reservation_code: 'RC-STU22334', customer_name: '渡辺 翔太', gateway: 'onsite', amount: 8800, status: 'unpaid', created_at: '2026-08-20 16:00' },
-  { id: 7, reservation_code: 'RC-VWX55667', customer_name: '中村 優子', gateway: 'square', amount: 6600, status: 'paid', created_at: '2026-08-20 08:45' },
+// Mock vehicle pricing (per vehicle, date-based)
+const mockVehiclePrices: Record<number, { id: number; vehicle_id: number; date_from: string; date_to: string; price: number; label: string }[]> = {
+  1: [
+    { id: 1, vehicle_id: 1, date_from: '2026-01-01', date_to: '2026-06-30', price: 3300, label: '通常シーズン' },
+    { id: 2, vehicle_id: 1, date_from: '2026-07-01', date_to: '2026-08-31', price: 4400, label: 'ハイシーズン' },
+    { id: 3, vehicle_id: 1, date_from: '2026-09-01', date_to: '2026-12-31', price: 3300, label: '通常シーズン' },
+  ],
+  2: [
+    { id: 4, vehicle_id: 2, date_from: '2026-01-01', date_to: '2026-06-30', price: 4400, label: '通常シーズン' },
+    { id: 5, vehicle_id: 2, date_from: '2026-07-01', date_to: '2026-08-31', price: 5500, label: 'ハイシーズン' },
+    { id: 6, vehicle_id: 2, date_from: '2026-09-01', date_to: '2026-12-31', price: 4400, label: '通常シーズン' },
+  ],
+  3: [
+    { id: 7, vehicle_id: 3, date_from: '2026-01-01', date_to: '2026-06-30', price: 5500, label: '通常シーズン' },
+    { id: 8, vehicle_id: 3, date_from: '2026-07-01', date_to: '2026-08-31', price: 7150, label: 'ハイシーズン' },
+    { id: 9, vehicle_id: 3, date_from: '2026-09-01', date_to: '2026-12-31', price: 5500, label: '通常シーズン' },
+  ],
+  4: [
+    { id: 10, vehicle_id: 4, date_from: '2026-01-01', date_to: '2026-12-31', price: 8800, label: '通年' },
+  ],
+  5: [
+    { id: 11, vehicle_id: 5, date_from: '2026-01-01', date_to: '2026-12-31', price: 9900, label: '通年' },
+  ],
+  6: [
+    { id: 12, vehicle_id: 6, date_from: '2026-01-01', date_to: '2026-12-31', price: 6600, label: '通年' },
+  ],
+}
+
+// Mock vehicle blocks (maintenance periods)
+const mockVehicleBlocks = [
+  { id: 1, vehicle_id: 1, date_from: '2026-09-10', date_to: '2026-09-12', reason: '定期点検' },
+  { id: 2, vehicle_id: 3, date_from: '2026-09-15', date_to: '2026-09-16', reason: 'タイヤ交換' },
+  { id: 3, vehicle_id: 5, date_from: '2026-10-01', date_to: '2026-10-03', reason: '車検' },
+  { id: 4, vehicle_id: 2, date_from: '2026-09-20', date_to: '2026-09-20', reason: 'エアコン修理' },
 ]
 
 const mockMailTemplates = [
@@ -616,17 +642,6 @@ const mockMailLogs = [
   { id: 5, template_key: 'applicant_cancelled', to_address: 'ito@example.com', subject: '【CLレンタカー】予約キャンセル完了', status: 'sent', retry_count: 0, sent_at: '2026-08-15 11:00' },
   { id: 6, template_key: 'reminder_pickup', to_address: 'tanaka@example.com', subject: '【CLレンタカー】明日ご利用予定のご案内', status: 'failed', retry_count: 3, sent_at: null },
   { id: 7, template_key: 'applicant_created', to_address: 'nakamura@example.com', subject: '【CLレンタカー】ご予約を受け付けました', status: 'sent', retry_count: 0, sent_at: '2026-08-20 08:50' },
-]
-
-const mockPrices = [
-  { id: 1, vehicle_id: 1, price_type: 'base', label: '通常料金', amount: 3300, date_from: null, date_to: null },
-  { id: 2, vehicle_id: 2, price_type: 'base', label: '通常料金', amount: 4400, date_from: null, date_to: null },
-  { id: 3, vehicle_id: 3, price_type: 'base', label: '通常料金', amount: 5500, date_from: null, date_to: null },
-  { id: 4, vehicle_id: 4, price_type: 'base', label: '通常料金', amount: 8800, date_from: null, date_to: null },
-  { id: 5, vehicle_id: 5, price_type: 'base', label: '通常料金', amount: 9900, date_from: null, date_to: null },
-  { id: 6, vehicle_id: 6, price_type: 'base', label: '通常料金', amount: 6600, date_from: null, date_to: null },
-  { id: 7, vehicle_id: 1, price_type: 'season', label: 'ハイシーズン（7-8月）', amount: 4400, date_from: '2026-07-01', date_to: '2026-08-31' },
-  { id: 8, vehicle_id: 2, price_type: 'season', label: 'ハイシーズン（7-8月）', amount: 5500, date_from: '2026-07-01', date_to: '2026-08-31' },
 ]
 
 const mockHolidays = [
@@ -684,10 +699,24 @@ app.get('/api/rentacar/v1/admin/reservations/:id', (c) => {
 })
 app.put('/api/rentacar/v1/admin/reservations/:id', async (c) => { return c.json({ success: true }) })
 
-// Admin Prices
-app.get('/api/rentacar/v1/admin/prices', (c) => c.json(mockPrices))
-app.post('/api/rentacar/v1/admin/prices', async (c) => c.json({ id: 9, success: true }))
-app.delete('/api/rentacar/v1/admin/prices/:id', (c) => c.json({ success: true }))
+// Admin Vehicle Prices (per vehicle)
+app.get('/api/rentacar/v1/admin/vehicles/:id/prices', (c) => {
+  const id = parseInt(c.req.param('id'))
+  return c.json(mockVehiclePrices[id] || [])
+})
+app.post('/api/rentacar/v1/admin/vehicles/:id/prices', async (c) => c.json({ id: 99, success: true }))
+app.delete('/api/rentacar/v1/admin/vehicles/:vid/prices/:id', (c) => c.json({ success: true }))
+
+// Admin Vehicle Blocks (maintenance)
+app.get('/api/rentacar/v1/admin/vehicles/:id/blocks', (c) => {
+  const id = parseInt(c.req.param('id'))
+  return c.json(mockVehicleBlocks.filter(b => b.vehicle_id === id))
+})
+app.get('/api/rentacar/v1/admin/blocks', (c) => {
+  return c.json(mockVehicleBlocks)
+})
+app.post('/api/rentacar/v1/admin/vehicles/:id/blocks', async (c) => c.json({ id: 99, success: true }))
+app.delete('/api/rentacar/v1/admin/vehicles/:vid/blocks/:id', (c) => c.json({ success: true }))
 
 // Admin Options
 app.get('/api/rentacar/v1/admin/options', (c) => {
@@ -696,38 +725,10 @@ app.get('/api/rentacar/v1/admin/options', (c) => {
 app.post('/api/rentacar/v1/admin/options', async (c) => c.json({ id: 8, success: true }))
 app.delete('/api/rentacar/v1/admin/options/:id', (c) => c.json({ success: true }))
 
-// Admin Slots
-app.get('/api/rentacar/v1/admin/slots', (c) => {
-  const vehicleId = parseInt(c.req.query('vehicle_id') || '1')
-  const from = c.req.query('from') || '2026-08-20'
-  const to = c.req.query('to') || '2026-09-20'
-  const days: Record<string, { capacity: number; booked: number; available: number; status: string }> = {}
-  const startD = new Date(from)
-  const endD = new Date(to)
-  for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
-    const ds = d.toISOString().split('T')[0]
-    const seed = (d.getDate() * 7 + vehicleId * 13 + (d.getMonth() + 1) * 3) % 10
-    if (d.getDay() === 0) {
-      days[ds] = { capacity: 2, booked: 0, available: 0, status: 'holiday' }
-    } else if (seed < 5) {
-      days[ds] = { capacity: 2, booked: 0, available: 2, status: 'available' }
-    } else if (seed < 8) {
-      days[ds] = { capacity: 2, booked: 1, available: 1, status: 'few' }
-    } else {
-      days[ds] = { capacity: 2, booked: 2, available: 0, status: 'full' }
-    }
-  }
-  return c.json({ vehicle_id: vehicleId, days })
-})
-app.post('/api/rentacar/v1/admin/slots/bulk', async (c) => c.json({ count: 30, success: true }))
-
 // Admin Holidays
 app.get('/api/rentacar/v1/admin/holidays', (c) => c.json(mockHolidays))
 app.post('/api/rentacar/v1/admin/holidays', async (c) => c.json({ id: 8, success: true }))
 app.delete('/api/rentacar/v1/admin/holidays/:id', (c) => c.json({ success: true }))
-
-// Admin Payments
-app.get('/api/rentacar/v1/admin/payments', (c) => c.json({ items: mockPayments, total: mockPayments.length }))
 
 // Admin Mail Templates
 app.get('/api/rentacar/v1/admin/mail-templates', (c) => c.json(mockMailTemplates))
@@ -748,8 +749,6 @@ app.get('/api/rentacar/v1/admin/settings', (c) => c.json({
   store_name: 'CLレンタカー', store_tel: '098-123-4567', store_email: 'info@cl-rentacar.com',
   store_address: '沖縄県那覇市おもろまち1-2-3', business_hours_start: '08:00', business_hours_end: '20:00',
   recaptcha_site_key: '', recaptcha_secret_key: '', recaptcha_score: '0.5',
-  payment_onsite_enabled: '1', payment_square_enabled: '0',
-  square_application_id: '', square_location_id: '', square_access_token_set: false, square_sandbox_mode: '1',
   rate_limit_per_minute: '10'
 }))
 app.post('/api/rentacar/v1/admin/settings', async (c) => c.json({ success: true }))
@@ -762,9 +761,8 @@ app.get('/api/rentacar/v1/admin/settings/system', (c) => c.json({
   tables: [
     { name: 'rc_vehicles', rows: 6 }, { name: 'rc_vehicle_meta', rows: 12 },
     { name: 'rc_reservations', rows: 8 }, { name: 'rc_reservation_options', rows: 5 },
-    { name: 'rc_prices', rows: 8 }, { name: 'rc_options', rows: 7 },
-    { name: 'rc_slots', rows: 180 }, { name: 'rc_holidays', rows: 7 },
-    { name: 'rc_payments', rows: 7 }, { name: 'rc_refunds', rows: 1 },
+    { name: 'rc_vehicle_prices', rows: 12 }, { name: 'rc_vehicle_blocks', rows: 4 },
+    { name: 'rc_options', rows: 7 }, { name: 'rc_holidays', rows: 7 },
     { name: 'rc_mail_templates', rows: 7 }, { name: 'rc_mail_logs', rows: 7 },
     { name: 'rc_settings', rows: 15 },
   ]
@@ -778,11 +776,11 @@ const adminMenuItems = [
   { key: 'dashboard', icon: '📊', label: 'ダッシュボード' },
   { key: 'reservations', icon: '📋', label: '予約管理' },
   { key: 'vehicles', icon: '🚗', label: '車両管理' },
-  { key: 'prices', icon: '💰', label: '料金プラン' },
+
   { key: 'options', icon: '🛡️', label: 'オプション' },
-  { key: 'slots', icon: '📅', label: '在庫カレンダー' },
+
   { key: 'holidays', icon: '🏖️', label: '休業日' },
-  { key: 'payments', icon: '💳', label: '決済履歴' },
+
   { key: 'mail-templates', icon: '✉️', label: 'メールテンプレート' },
   { key: 'mail-logs', icon: '📨', label: 'メール送信ログ' },
   { key: 'settings', icon: '⚙️', label: '設定' },
