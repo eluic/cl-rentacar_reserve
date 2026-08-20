@@ -1,0 +1,49 @@
+/* Cancel form styles — inherits variables from booking.css or standalone */
+:root {
+    --rc-primary: #00bcd4;
+    --rc-primary-dark: #0097a7;
+    --rc-primary-light: #b2ebf2;
+    --rc-success: #4caf50;
+    --rc-danger: #e53935;
+    --rc-text: #333;
+    --rc-text-light: #666;
+    --rc-text-muted: #999;
+    --rc-bg: #f5f9fa;
+    --rc-white: #fff;
+    --rc-border: #e0e0e0;
+    --rc-radius: 8px;
+    --rc-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --rc-font: "Noto Sans JP","Hiragino Sans","Meiryo",sans-serif;
+}
+.rc-cancel * { box-sizing: border-box; }
+.rc-cancel { font-family: var(--rc-font); color: var(--rc-text); max-width: 600px; margin: 0 auto; padding: 24px; }
+.rc-cancel .rc-step-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 3px solid var(--rc-primary); }
+.rc-cancel-desc { font-size: 14px; color: var(--rc-text-light); margin-bottom: 20px; }
+.rc-cancel .rc-form-group { margin-bottom: 16px; }
+.rc-cancel .rc-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.rc-cancel .rc-input { width: 100%; padding: 10px 14px; border: 1px solid var(--rc-border); border-radius: 6px; font-size: 16px; font-family: var(--rc-font); }
+.rc-cancel .rc-input:focus { border-color: var(--rc-primary); outline: none; box-shadow: 0 0 0 3px rgba(0,188,212,0.15); }
+.rc-cancel .rc-error-msg { font-size: 12px; color: var(--rc-danger); margin-top: 4px; display: block; }
+.rc-cancel .rc-btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 32px; border: none; border-radius: 50px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--rc-font); }
+.rc-cancel .rc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.rc-cancel .rc-btn-primary { background: linear-gradient(135deg, var(--rc-primary), #26c6da); color: var(--rc-white); }
+.rc-cancel .rc-btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--rc-primary-dark), var(--rc-primary)); }
+.rc-cancel .rc-btn-secondary { background: var(--rc-white); color: var(--rc-text); border: 2px solid var(--rc-border); }
+.rc-cancel .rc-btn-secondary:hover { border-color: var(--rc-primary); color: var(--rc-primary); }
+.rc-cancel .rc-btn-danger { background: var(--rc-danger); color: var(--rc-white); }
+.rc-cancel .rc-btn-danger:hover:not(:disabled) { background: #c62828; }
+.rc-cancel-details { background: var(--rc-white); border-radius: var(--rc-radius); box-shadow: var(--rc-shadow); padding: 20px; margin-bottom: 20px; }
+.rc-cancel-details .rc-confirm-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+.rc-cancel-details .rc-confirm-row:last-child { border-bottom: none; }
+.rc-cancel-details .rc-confirm-label { color: var(--rc-text-light); }
+.rc-cancel-details .rc-confirm-value { font-weight: 600; }
+.rc-cancel-policy { background: #fff8e1; border: 1px solid #ffe082; border-radius: var(--rc-radius); padding: 16px; margin-bottom: 20px; }
+.rc-cancel-policy h4 { font-size: 14px; margin-bottom: 8px; color: #f57f17; }
+.rc-cancel-policy p { font-size: 13px; color: var(--rc-text-light); margin-bottom: 12px; }
+.rc-cancel .rc-checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.rc-cancel .rc-checkbox-label input { width: 18px; height: 18px; accent-color: var(--rc-primary); }
+.rc-cancel .rc-step-nav { display: flex; justify-content: space-between; margin-top: 20px; }
+.rc-cancel .rc-complete { text-align: center; padding: 40px 20px; }
+.rc-cancel .rc-complete-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--rc-success); color: white; font-size: 40px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+.rc-cancel-icon { background: var(--rc-primary) !important; }
+.rc-cancel .rc-complete-message { font-size: 14px; color: var(--rc-text-light); line-height: 1.8; }
