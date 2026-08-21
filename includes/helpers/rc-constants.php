@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /* ── Version ─────────────────────────────────────────── */
-define( 'RC_PLUGIN_VERSION',  '1.0.0' );
-define( 'RC_DB_VERSION',      '1.0.0' );
+define( 'RC_PLUGIN_VERSION',  '1.1.0' );
+define( 'RC_DB_VERSION',      '1.1.0' );
 
 /* ── Paths ───────────────────────────────────────────── */
 define( 'RC_PLUGIN_DIR',  plugin_dir_path( dirname( __DIR__ ) ) );

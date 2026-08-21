@@ -1,5 +1,43 @@
 # Changelog — Rentacar Booking
 
+## [1.1.0] - 2026-08-21
+
+### 変更内容
+
+#### 管理画面の構造変更
+- **削除**: 決済管理ページ（現地決済のみのため不要）
+- **削除**: 料金プランページ（車両管理に統合）
+- **削除**: 在庫カレンダーページ（在庫は車両の stock フィールドで管理）
+- **削除**: 予約一覧・詳細の決済ステータス表示
+- メニュー項目を 12 → 9 に整理
+
+#### 車両管理の強化
+- **期間別料金設定を車両編集モーダルに統合**: 車両ごとに期間別日額料金を直接設定可能
+  - 新規追加 (POST /admin/vehicles/{id}/prices)
+  - インライン編集 (PUT /admin/vehicles/{vid}/prices/{id})
+  - 削除 (DELETE /admin/vehicles/{vid}/prices/{id})
+- **メンテナンスブロック機能を追加**: 車検・修理・点検期間中の予約を自動ブロック
+  - ブロック一覧 (GET /admin/vehicles/{id}/blocks)
+  - ブロック追加 (POST /admin/vehicles/{id}/blocks)
+  - ブロック解除 (DELETE /admin/vehicles/{vid}/blocks/{id})
+  - 予約カレンダーにブロック状態を反映
+
+#### データベース
+- `rc_vehicle_blocks` テーブルを追加（vehicle_id, date_from, date_to, reason）
+- DB バージョン: 1.0.0 → 1.1.0（自動マイグレーション対応）
+
+#### 新規ファイル
+- `includes/models/class-rc-model-vehicle-block.php`
+- `includes/rest/admin/class-rc-rest-admin-vehicle-prices.php`
+- `includes/rest/admin/class-rc-rest-admin-vehicle-blocks.php`
+
+#### 削除ファイル
+- `admin/views/payments.php`
+- `admin/views/prices.php`
+- `admin/views/slots.php`
+
+---
+
 ## [1.0.0] - 2026-08-20
 
 ### 構築内容

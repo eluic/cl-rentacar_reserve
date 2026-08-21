@@ -222,7 +222,21 @@ class RC_Activator {
             KEY log_status (status)
         ) {$charset};";
 
-        // 13. rc_settings
+        // 13. rc_vehicle_blocks
+        $t = rc_table( 'vehicle_blocks' );
+        $tables[] = "CREATE TABLE {$t} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            vehicle_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            date_from DATE NOT NULL,
+            date_to DATE NOT NULL,
+            reason VARCHAR(255) NOT NULL DEFAULT '',
+            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            PRIMARY KEY (id),
+            KEY block_vehicle (vehicle_id),
+            KEY block_dates (date_from, date_to)
+        ) {$charset};";
+
+        // 14. rc_settings
         $t = rc_table( 'settings' );
         $tables[] = "CREATE TABLE {$t} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

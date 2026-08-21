@@ -36,12 +36,11 @@ class RC_Rest {
         // Admin endpoints
         $admin_controllers = array(
             'RC_Rest_Admin_Vehicles',
-            'RC_Rest_Admin_Prices',
+            'RC_Rest_Admin_Vehicle_Prices',
+            'RC_Rest_Admin_Vehicle_Blocks',
             'RC_Rest_Admin_Options',
-            'RC_Rest_Admin_Slots',
             'RC_Rest_Admin_Holidays',
             'RC_Rest_Admin_Reservations',
-            'RC_Rest_Admin_Payments',
             'RC_Rest_Admin_Mail_Templates',
             'RC_Rest_Admin_Mail_Logs',
             'RC_Rest_Admin_Settings',

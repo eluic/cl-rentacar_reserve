@@ -8,10 +8,12 @@
         var opts = {
             method: method,
             url: API + path,
-            beforeSend: function (xhr) { xhr.setRequestHeader('X-WP-Nonce', nonce); },
             dataType: 'json',
             contentType: 'application/json'
         };
+        if (nonce && nonce !== 'preview-nonce') {
+            opts.beforeSend = function (xhr) { xhr.setRequestHeader('X-WP-Nonce', nonce); };
+        }
         if (data && method !== 'GET') opts.data = JSON.stringify(data);
         if (data && method === 'GET') opts.data = data;
         return $.ajax(opts);
@@ -21,11 +23,9 @@
     function esc(s) { return $('<span>').text(s || '').html(); }
     function badge(status) {
         var map = { pending: 'pending', confirmed: 'confirmed', cancelled: 'cancelled', completed: 'completed',
-                    unpaid: 'unpaid', paid: 'paid', refunded: 'refunded', no_show: 'cancelled',
-                    pending_onsite: 'pending', sent: 'confirmed', failed: 'cancelled' };
+                    no_show: 'cancelled', sent: 'confirmed', failed: 'cancelled' };
         var labels = { pending: '保留中', confirmed: '確定', cancelled: 'キャンセル', completed: '完了',
-                       unpaid: '未払い', paid: '支払い済み', refunded: '返金済み', no_show: 'ノーショー',
-                       pending_onsite: '現地払い', sent: '送信済み', failed: '失敗' };
+                       no_show: 'ノーショー', sent: '送信済み', failed: '失敗' };
         var cls = map[status] || 'pending';
         return '<span class="rca-badge rca-badge-' + cls + '">' + esc(labels[status] || status) + '</span>';
     }
@@ -44,11 +44,8 @@
         dashboard: loadDashboard,
         vehicles: loadVehicles,
         reservations: loadReservations,
-        prices: loadPrices,
         options: loadOptions,
-        slots: loadSlots,
         holidays: loadHolidays,
-        payments: loadPayments,
         'mail-templates': loadMailTemplates,
         'mail-logs': loadMailLogs,
         settings: loadSettings,
@@ -87,25 +84,10 @@
         });
     }
 
-    /* ── Vehicles ──────────────────────────────────────── */
+    /* ── Vehicles (with Pricing & Blocks tabs) ────────── */
     function loadVehicles() {
         var html = '<div class="rca-toolbar"><button class="rca-btn rca-btn-primary" id="rca-add-vehicle">+ 車両を追加</button></div>' +
-            '<div id="rca-vehicles-table"></div>' +
-            '<div class="rca-modal-overlay" id="rca-vehicle-modal"><div class="rca-modal">' +
-            '<h3 class="rca-modal-title" id="rca-vehicle-modal-title">車両追加</h3>' +
-            '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">車両名</label><input class="rca-input" id="rv-name"></div>' +
-            '<div class="rca-form-group"><label class="rca-label">スラッグ</label><input class="rca-input" id="rv-slug"></div></div>' +
-            '<div class="rca-form-group"><label class="rca-label">説明</label><textarea class="rca-textarea" id="rv-desc" rows="3"></textarea></div>' +
-            '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">基本料金（円/日）</label><input type="number" class="rca-input" id="rv-price" value="0"></div>' +
-            '<div class="rca-form-group"><label class="rca-label">在庫台数</label><input type="number" class="rca-input" id="rv-stock" value="1" min="0"></div></div>' +
-            '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">定員</label><input type="number" class="rca-input" id="rv-seats" value="5" min="1"></div>' +
-            '<div class="rca-form-group"><label class="rca-label">ミッション</label><select class="rca-select" id="rv-transmission"><option value="AT">AT</option><option value="MT">MT</option><option value="CVT">CVT</option></select></div></div>' +
-            '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">車両クラス</label><input class="rca-input" id="rv-class"></div>' +
-            '<div class="rca-form-group"><label class="rca-label">ステータス</label><select class="rca-select" id="rv-status"><option value="published">公開</option><option value="private">非公開</option></select></div></div>' +
-            '<div class="rca-form-group"><label class="rca-label">サムネイル画像ID</label><input type="number" class="rca-input" id="rv-thumb" value="0"><small style="color:#999">WPメディアライブラリのIDを入力</small></div>' +
-            '<input type="hidden" id="rv-id" value="0">' +
-            '<div class="rca-modal-footer"><button class="rca-btn rca-btn-secondary" id="rca-vehicle-cancel">キャンセル</button><button class="rca-btn rca-btn-primary" id="rca-vehicle-save">保存</button></div>' +
-            '</div></div>';
+            '<div id="rca-vehicles-table"></div>';
         $app.html(html);
 
         function refreshTable() {
@@ -115,7 +97,9 @@
                     var seats = (v.meta && v.meta.seats) || '-';
                     var trans = (v.meta && v.meta.transmission) || '-';
                     t += '<tr><td>' + v.id + '</td><td>' + esc(v.name) + '</td><td>' + seats + '</td><td>' + trans + '</td><td>' + formatPrice(v.base_price) + '</td><td>' + v.stock + '</td><td>' + badge(v.status === 'published' ? 'confirmed' : 'cancelled') + '</td>' +
-                        '<td><button class="rca-btn rca-btn-sm rca-btn-secondary rca-edit-vehicle" data-id="' + v.id + '">編集</button> <button class="rca-btn rca-btn-sm rca-btn-danger rca-del-vehicle" data-id="' + v.id + '">削除</button></td></tr>';
+                        '<td><button class="rca-btn rca-btn-sm rca-btn-secondary rca-edit-vehicle" data-id="' + v.id + '">編集</button> ' +
+                        '<button class="rca-btn rca-btn-sm" style="background:#ff9800;color:#fff" data-id="' + v.id + '" data-name="' + esc(v.name) + '" onclick="window._openVehicleBlocks(' + v.id + ',\'' + esc(v.name).replace(/'/g, "\\'") + '\')">ブロック</button> ' +
+                        '<button class="rca-btn rca-btn-sm rca-btn-danger rca-del-vehicle" data-id="' + v.id + '">削除</button></td></tr>';
                 });
                 t += '</tbody></table></div>';
                 $('#rca-vehicles-table').html(t);
@@ -123,26 +107,10 @@
         }
         refreshTable();
 
-        $('#rca-add-vehicle').on('click', function () { resetVehicleForm(); $('#rca-vehicle-modal').addClass('active'); });
-        $('#rca-vehicle-cancel').on('click', function () { $('#rca-vehicle-modal').removeClass('active'); });
+        $('#rca-add-vehicle').on('click', function () { openVehicleModal(0); });
 
         $(document).on('click', '.rca-edit-vehicle', function () {
-            var id = $(this).data('id');
-            api('GET', '/admin/vehicles/' + id).done(function (v) {
-                $('#rv-id').val(v.id);
-                $('#rv-name').val(v.name);
-                $('#rv-slug').val(v.slug);
-                $('#rv-desc').val(v.description);
-                $('#rv-price').val(v.base_price);
-                $('#rv-stock').val(v.stock);
-                $('#rv-seats').val((v.meta && v.meta.seats) || 5);
-                $('#rv-transmission').val((v.meta && v.meta.transmission) || 'AT');
-                $('#rv-class').val((v.meta && v.meta.vehicle_class) || '');
-                $('#rv-status').val(v.status);
-                $('#rv-thumb').val(v.thumbnail_id);
-                $('#rca-vehicle-modal-title').text('車両編集');
-                $('#rca-vehicle-modal').addClass('active');
-            });
+            openVehicleModal($(this).data('id'));
         });
 
         $(document).on('click', '.rca-del-vehicle', function () {
@@ -150,29 +118,228 @@
             api('DELETE', '/admin/vehicles/' + $(this).data('id')).done(function () { toast('削除しました'); refreshTable(); });
         });
 
-        $('#rca-vehicle-save').on('click', function () {
-            var data = {
-                name: $('#rv-name').val(), slug: $('#rv-slug').val(), description: $('#rv-desc').val(),
-                base_price: parseInt($('#rv-price').val()), stock: parseInt($('#rv-stock').val()),
-                seats: parseInt($('#rv-seats').val()), transmission: $('#rv-transmission').val(),
-                vehicle_class: $('#rv-class').val(), status: $('#rv-status').val(),
-                thumbnail_id: parseInt($('#rv-thumb').val()) || 0
-            };
-            var id = parseInt($('#rv-id').val());
-            var req = id ? api('PUT', '/admin/vehicles/' + id, data) : api('POST', '/admin/vehicles', data);
-            req.done(function () { toast('保存しました'); $('#rca-vehicle-modal').removeClass('active'); refreshTable(); })
-               .fail(function () { toast('保存に失敗しました', true); });
-        });
+        // ── Vehicle Edit Modal (with inline pricing) ──
+        function openVehicleModal(id) {
+            $('.rca-modal-overlay').remove();
+            var pricingSection = id
+                ? '<div style="border-top:2px solid #00bcd4;margin-top:24px;padding-top:16px">' +
+                  '<h4 style="font-size:15px;font-weight:700;color:#00bcd4;margin-bottom:12px">📅 期間別料金設定</h4>' +
+                  '<p style="font-size:12px;color:#666;margin-bottom:12px">期間ごとの日額料金を設定します。基本料金は上の「基本料金」が適用されます。<br>例: 10/1〜10/31 → ¥5,500/日</p>' +
+                  '<div id="rv-pricing-list"><div class="rc-loading" style="padding:12px">読み込み中...</div></div>' +
+                  '<div style="background:#f8f9fa;border-radius:6px;padding:12px;margin-top:12px">' +
+                  '<div style="font-size:13px;font-weight:600;margin-bottom:8px">＋ 料金期間を追加</div>' +
+                  '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">開始日</label><input type="date" class="rca-input" id="rv-p-from"></div>' +
+                  '<div class="rca-form-group"><label class="rca-label">終了日</label><input type="date" class="rca-input" id="rv-p-to"></div>' +
+                  '<div class="rca-form-group"><label class="rca-label">日額（円）</label><input type="number" class="rca-input" id="rv-p-amount" value="5000" min="0"></div></div>' +
+                  '<div class="rca-form-row" style="margin-top:4px"><div class="rca-form-group"><label class="rca-label">ラベル</label><input class="rca-input" id="rv-p-label" placeholder="例: ハイシーズン"></div>' +
+                  '<div class="rca-form-group" style="padding-top:20px"><button class="rca-btn rca-btn-primary rca-btn-sm" id="rv-p-add">追加</button></div></div>' +
+                  '</div></div>'
+                : '';
 
-        function resetVehicleForm() {
-            $('#rv-id').val(0); $('#rv-name,#rv-slug,#rv-desc,#rv-class').val('');
-            $('#rv-price').val(0); $('#rv-stock').val(1); $('#rv-seats').val(5);
-            $('#rv-transmission').val('AT'); $('#rv-status').val('published'); $('#rv-thumb').val(0);
-            $('#rca-vehicle-modal-title').text('車両追加');
+            var m = '<div class="rca-modal-overlay active" id="rca-vehicle-modal"><div class="rca-modal" style="max-width:720px;max-height:90vh;overflow-y:auto">' +
+                '<h3 class="rca-modal-title">' + (id ? '車両編集' : '車両追加') + '</h3>' +
+                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">車両名</label><input class="rca-input" id="rv-name"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">スラッグ</label><input class="rca-input" id="rv-slug"></div></div>' +
+                '<div class="rca-form-group"><label class="rca-label">説明</label><textarea class="rca-textarea" id="rv-desc" rows="3"></textarea></div>' +
+                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">基本料金（円/日）</label><input type="number" class="rca-input" id="rv-price" value="0"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">在庫台数</label><input type="number" class="rca-input" id="rv-stock" value="1" min="0"></div></div>' +
+                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">定員</label><input type="number" class="rca-input" id="rv-seats" value="5" min="1"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">ミッション</label><select class="rca-select" id="rv-transmission"><option value="AT">AT</option><option value="MT">MT</option><option value="CVT">CVT</option></select></div></div>' +
+                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">車両クラス</label><input class="rca-input" id="rv-class"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">ステータス</label><select class="rca-select" id="rv-status"><option value="published">公開</option><option value="private">非公開</option></select></div></div>' +
+                '<div class="rca-form-group"><label class="rca-label">サムネイル画像ID</label><input type="number" class="rca-input" id="rv-thumb" value="0"><small style="color:#999">WPメディアライブラリのIDを入力</small></div>' +
+                '<input type="hidden" id="rv-id" value="0">' +
+                pricingSection +
+                '<div class="rca-modal-footer" style="margin-top:20px"><button class="rca-btn rca-btn-secondary" id="rca-vehicle-cancel">閉じる</button><button class="rca-btn rca-btn-primary" id="rca-vehicle-save">車両情報を保存</button></div>' +
+                '</div></div>';
+            $('body').append(m);
+
+            if (id) {
+                api('GET', '/admin/vehicles/' + id).done(function (v) {
+                    $('#rv-id').val(v.id);
+                    $('#rv-name').val(v.name);
+                    $('#rv-slug').val(v.slug);
+                    $('#rv-desc').val(v.description);
+                    $('#rv-price').val(v.base_price);
+                    $('#rv-stock').val(v.stock);
+                    $('#rv-seats').val((v.meta && v.meta.seats) || 5);
+                    $('#rv-transmission').val((v.meta && v.meta.transmission) || 'AT');
+                    $('#rv-class').val((v.meta && v.meta.vehicle_class) || '');
+                    $('#rv-status').val(v.status);
+                    $('#rv-thumb').val(v.thumbnail_id);
+                });
+                // Load pricing inline
+                refreshVehiclePricing(id);
+            }
+
+            $('#rca-vehicle-cancel').on('click', function () { $('#rca-vehicle-modal').remove(); });
+            $('#rca-vehicle-save').on('click', function () {
+                var data = {
+                    name: $('#rv-name').val(), slug: $('#rv-slug').val(), description: $('#rv-desc').val(),
+                    base_price: parseInt($('#rv-price').val()), stock: parseInt($('#rv-stock').val()),
+                    seats: parseInt($('#rv-seats').val()), transmission: $('#rv-transmission').val(),
+                    vehicle_class: $('#rv-class').val(), status: $('#rv-status').val(),
+                    thumbnail_id: parseInt($('#rv-thumb').val()) || 0
+                };
+                var vid = parseInt($('#rv-id').val());
+                var req = vid ? api('PUT', '/admin/vehicles/' + vid, data) : api('POST', '/admin/vehicles', data);
+                req.done(function () { toast('保存しました'); $('#rca-vehicle-modal').remove(); refreshTable(); })
+                   .fail(function () { toast('保存に失敗しました', true); });
+            });
+
+            // Pricing add button
+            $('#rv-p-add').on('click', function () {
+                var data = {
+                    date_from: $('#rv-p-from').val(),
+                    date_to: $('#rv-p-to').val(),
+                    price: parseInt($('#rv-p-amount').val()),
+                    label: $('#rv-p-label').val()
+                };
+                if (!data.date_from || !data.date_to) { toast('開始日と終了日を入力してください', true); return; }
+                api('POST', '/admin/vehicles/' + id + '/prices', data).done(function () {
+                    toast('料金を追加しました');
+                    $('#rv-p-from, #rv-p-to, #rv-p-label').val('');
+                    refreshVehiclePricing(id);
+                });
+            });
+
+            // Pricing delete (delegated)
+            $(document).on('click', '.rca-del-vp', function () {
+                var pid = $(this).data('id');
+                if (!confirm('この料金設定を削除しますか？')) return;
+                api('DELETE', '/admin/vehicles/' + id + '/prices/' + pid).done(function () {
+                    toast('削除しました');
+                    refreshVehiclePricing(id);
+                });
+            });
+
+            // Pricing inline edit
+            $(document).on('click', '.rca-edit-vp', function () {
+                var $row = $(this).closest('tr');
+                var pid = $row.data('id');
+                var df = $row.data('from');
+                var dt = $row.data('to');
+                var pr = $row.data('price');
+                var lb = $row.data('label');
+                $row.html(
+                    '<td><input type="date" class="rca-input" id="rca-ep-from-' + pid + '" value="' + df + '" style="font-size:12px;padding:4px 6px"></td>' +
+                    '<td><input class="rca-input" id="rca-ep-label-' + pid + '" value="' + esc(lb) + '" style="font-size:12px;padding:4px 6px"></td>' +
+                    '<td><div style="display:flex;align-items:center;gap:2px"><input type="number" class="rca-input" id="rca-ep-price-' + pid + '" value="' + pr + '" style="font-size:12px;padding:4px 6px;width:80px" min="0"><span style="font-size:11px;white-space:nowrap">/日</span></div>' +
+                    '<input type="date" class="rca-input" id="rca-ep-to-' + pid + '" value="' + dt + '" style="font-size:12px;padding:4px 6px;margin-top:4px"></td>' +
+                    '<td><button class="rca-btn rca-btn-sm rca-btn-primary rca-save-vp" data-id="' + pid + '" style="margin-right:4px">保存</button>' +
+                    '<button class="rca-btn rca-btn-sm rca-btn-secondary rca-cancel-vp">中止</button></td>'
+                );
+            });
+
+            // Pricing inline save
+            $(document).on('click', '.rca-save-vp', function () {
+                var pid = $(this).data('id');
+                var data = {
+                    date_from: $('#rca-ep-from-' + pid).val(),
+                    date_to: $('#rca-ep-to-' + pid).val(),
+                    price: parseInt($('#rca-ep-price-' + pid).val()),
+                    label: $('#rca-ep-label-' + pid).val()
+                };
+                if (!data.date_from || !data.date_to) { toast('日付を入力してください', true); return; }
+                api('PUT', '/admin/vehicles/' + id + '/prices/' + pid, data).done(function () {
+                    toast('更新しました');
+                    refreshVehiclePricing(id);
+                }).fail(function () { toast('更新に失敗しました', true); });
+            });
+
+            // Pricing inline cancel
+            $(document).on('click', '.rca-cancel-vp', function () {
+                refreshVehiclePricing(id);
+            });
+        }
+
+        function refreshVehiclePricing(vid) {
+            api('GET', '/admin/vehicles/' + vid + '/prices').done(function (items) {
+                if (!items.length) {
+                    $('#rv-pricing-list').html('<p style="color:#999;text-align:center;padding:8px;font-size:13px">期間別料金はまだ設定されていません</p>');
+                    return;
+                }
+                var t = '<div class="rca-table-wrap" style="font-size:13px"><table class="rca-table"><thead><tr><th>期間</th><th>ラベル</th><th>日額</th><th style="width:120px"></th></tr></thead><tbody>';
+                items.forEach(function (p) {
+                    var fromParts = p.date_from.split('-');
+                    var toParts = p.date_to.split('-');
+                    var period = parseInt(fromParts[1]) + '/' + parseInt(fromParts[2]) + ' ～ ' + parseInt(toParts[1]) + '/' + parseInt(toParts[2]);
+                    t += '<tr class="rca-vp-row" data-id="' + p.id + '" data-from="' + p.date_from + '" data-to="' + p.date_to + '" data-price="' + p.price + '" data-label="' + esc(p.label) + '">' +
+                        '<td>' + period + '</td><td>' + esc(p.label) + '</td><td><strong>' + formatPrice(p.price) + '</strong>/日</td>' +
+                        '<td><button class="rca-btn rca-btn-sm rca-btn-secondary rca-edit-vp" data-id="' + p.id + '" style="margin-right:4px">編集</button>' +
+                        '<button class="rca-btn rca-btn-sm rca-btn-danger rca-del-vp" data-id="' + p.id + '">削除</button></td></tr>';
+                });
+                t += '</tbody></table></div>';
+                $('#rv-pricing-list').html(t);
+            });
+        }
+
+        // ── Vehicle Blocks Modal ──
+        window._openVehicleBlocks = function (vid, vname) {
+            openBlocksModal(vid, vname);
+        };
+
+        function openBlocksModal(vid, vname) {
+            $('.rca-modal-overlay').remove();
+            var m = '<div class="rca-modal-overlay active" id="rca-blocks-modal"><div class="rca-modal" style="max-width:700px">' +
+                '<h3 class="rca-modal-title" style="color:#ff9800">🔧 メンテナンスブロック: ' + esc(vname) + '</h3>' +
+                '<p style="font-size:12px;color:#666;margin-bottom:16px">設定した期間中、この車両は予約不可になります。車検・修理・点検などのメンテナンス期間を管理できます。</p>' +
+                '<div id="rca-blocks-table"><div class="rc-loading">読み込み中...</div></div>' +
+                '<h4 style="margin-top:20px;font-size:14px;font-weight:700">新しいブロック期間を追加</h4>' +
+                '<div class="rca-form-row" style="margin-top:8px">' +
+                '<div class="rca-form-group"><label class="rca-label">開始日</label><input type="date" class="rca-input" id="rca-block-from"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">終了日</label><input type="date" class="rca-input" id="rca-block-to"></div>' +
+                '</div>' +
+                '<div class="rca-form-row" style="margin-top:4px">' +
+                '<div class="rca-form-group"><label class="rca-label">理由</label><input class="rca-input" id="rca-block-reason" placeholder="例: 定期点検、タイヤ交換、車検"></div>' +
+                '<div class="rca-form-group" style="padding-top:20px"><button class="rca-btn" style="background:#ff9800;color:#fff" id="rca-block-add">ブロック追加</button></div>' +
+                '</div>' +
+                '<div class="rca-modal-footer"><button class="rca-btn rca-btn-secondary" onclick="jQuery(\'#rca-blocks-modal\').remove()">閉じる</button></div>' +
+                '</div></div>';
+            $('body').append(m);
+
+            function refreshBlocks() {
+                api('GET', '/admin/vehicles/' + vid + '/blocks').done(function (items) {
+                    if (!items.length) {
+                        $('#rca-blocks-table').html('<p style="color:#999;text-align:center;padding:16px">ブロック設定はありません。</p>');
+                        return;
+                    }
+                    var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>開始日</th><th>終了日</th><th>理由</th><th>操作</th></tr></thead><tbody>';
+                    items.forEach(function (b) {
+                        t += '<tr><td>' + esc(b.date_from) + '</td><td>' + esc(b.date_to) + '</td><td>' + esc(b.reason) + '</td>' +
+                            '<td><button class="rca-btn rca-btn-sm rca-btn-danger rca-del-block" data-id="' + b.id + '">解除</button></td></tr>';
+                    });
+                    t += '</tbody></table></div>';
+                    $('#rca-blocks-table').html(t);
+                });
+            }
+            refreshBlocks();
+
+            $('#rca-block-add').on('click', function () {
+                var data = {
+                    date_from: $('#rca-block-from').val(),
+                    date_to: $('#rca-block-to').val(),
+                    reason: $('#rca-block-reason').val()
+                };
+                if (!data.date_from || !data.date_to) { toast('開始日と終了日を入力してください', true); return; }
+                if (!data.reason) { toast('理由を入力してください', true); return; }
+                api('POST', '/admin/vehicles/' + vid + '/blocks', data).done(function () {
+                    toast('ブロックを追加しました');
+                    refreshBlocks();
+                });
+            });
+
+            $(document).on('click', '.rca-del-block', function () {
+                if (!confirm('このブロックを解除しますか？')) return;
+                api('DELETE', '/admin/vehicles/' + vid + '/blocks/' + $(this).data('id')).done(function () {
+                    toast('ブロックを解除しました');
+                    refreshBlocks();
+                });
+            });
         }
     }
 
-    /* ── Reservations ─────────────────────────────────── */
+    /* ── Reservations (no payment_status) ─────────────── */
     function loadReservations() {
         var params = { page: 1, per_page: 20 };
         var html = '<div class="rca-toolbar"><div class="rca-search"><input class="rca-input" id="rca-res-search" placeholder="名前・メール・予約番号で検索" style="width:280px"><button class="rca-btn rca-btn-primary" id="rca-res-search-btn">検索</button></div>' +
@@ -184,14 +351,13 @@
             params.search = $('#rca-res-search').val();
             params.status = $('#rca-res-status').val();
             api('GET', '/admin/reservations', params).done(function (d) {
-                var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>予約番号</th><th>お客様</th><th>車両</th><th>貸出日</th><th>返却日</th><th>金額</th><th>予約状態</th><th>決済</th><th>操作</th></tr></thead><tbody>';
+                var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>予約番号</th><th>お客様</th><th>車両</th><th>貸出日</th><th>返却日</th><th>金額</th><th>ステータス</th><th>操作</th></tr></thead><tbody>';
                 d.items.forEach(function (r) {
-                    t += '<tr><td>' + esc(r.reservation_code) + '</td><td>' + esc(r.customer_name) + '</td><td>' + esc(r.vehicle_name) + '</td><td>' + esc(r.pickup_at) + '</td><td>' + esc(r.return_at) + '</td><td>' + formatPrice(r.total_amount) + '</td><td>' + badge(r.status) + '</td><td>' + badge(r.payment_status) + '</td>' +
+                    t += '<tr><td>' + esc(r.reservation_code) + '</td><td>' + esc(r.customer_name) + '</td><td>' + esc(r.vehicle_name) + '</td><td>' + esc(r.pickup_at) + '</td><td>' + esc(r.return_at) + '</td><td>' + formatPrice(r.total_amount) + '</td><td>' + badge(r.status) + '</td>' +
                         '<td><button class="rca-btn rca-btn-sm rca-btn-secondary rca-view-res" data-id="' + r.id + '">詳細</button></td></tr>';
                 });
                 t += '</tbody></table></div>';
                 $('#rca-res-table').html(t);
-                // Pagination
                 var total = d.total;
                 var totalPages = Math.ceil(total / params.per_page);
                 var phtml = '';
@@ -210,14 +376,14 @@
             api('GET', '/admin/reservations/' + id).done(function (r) {
                 var m = '<div class="rca-modal-overlay active" id="rca-res-detail-modal"><div class="rca-modal" style="max-width:700px">' +
                     '<h3 class="rca-modal-title">予約詳細: ' + esc(r.reservation_code) + '</h3>' +
-                    '<table style="width:100%;font-size:13px"><tbody>' +
-                    '<tr><td><strong>お名前</strong></td><td>' + esc(r.customer_name) + '</td><td><strong>フリガナ</strong></td><td>' + esc(r.customer_kana) + '</td></tr>' +
-                    '<tr><td><strong>メール</strong></td><td>' + esc(r.customer_email) + '</td><td><strong>電話</strong></td><td>' + esc(r.customer_tel) + '</td></tr>' +
-                    '<tr><td><strong>郵便番号</strong></td><td>' + esc(r.customer_zip) + '</td><td><strong>住所</strong></td><td>' + esc(r.customer_address) + '</td></tr>' +
-                    '<tr><td><strong>免許証番号</strong></td><td>' + esc(r.license_no) + '</td><td><strong>車両</strong></td><td>' + esc(r.vehicle_name) + '</td></tr>' +
-                    '<tr><td><strong>貸出日時</strong></td><td>' + esc(r.pickup_at) + '</td><td><strong>返却日時</strong></td><td>' + esc(r.return_at) + '</td></tr>' +
-                    '<tr><td><strong>合計金額</strong></td><td>' + formatPrice(r.total_amount) + '</td><td><strong>ステータス</strong></td><td>' + badge(r.status) + '</td></tr>' +
-                    '<tr><td><strong>決済</strong></td><td>' + badge(r.payment_status) + '</td><td><strong>備考</strong></td><td>' + esc(r.note) + '</td></tr>' +
+                    '<table style="width:100%;font-size:13px;border-collapse:collapse"><tbody>' +
+                    '<tr><td style="padding:6px;font-weight:700">お名前</td><td style="padding:6px">' + esc(r.customer_name) + '</td><td style="padding:6px;font-weight:700">フリガナ</td><td style="padding:6px">' + esc(r.customer_kana) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">メール</td><td style="padding:6px">' + esc(r.customer_email) + '</td><td style="padding:6px;font-weight:700">電話</td><td style="padding:6px">' + esc(r.customer_tel) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">郵便番号</td><td style="padding:6px">' + esc(r.customer_zip) + '</td><td style="padding:6px;font-weight:700">住所</td><td style="padding:6px">' + esc(r.customer_address) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">免許証番号</td><td style="padding:6px">' + esc(r.license_no) + '</td><td style="padding:6px;font-weight:700">車両</td><td style="padding:6px">' + esc(r.vehicle_name) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">貸出日時</td><td style="padding:6px">' + esc(r.pickup_at) + '</td><td style="padding:6px;font-weight:700">返却日時</td><td style="padding:6px">' + esc(r.return_at) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">合計金額</td><td style="padding:6px">' + formatPrice(r.total_amount) + '</td><td style="padding:6px;font-weight:700">ステータス</td><td style="padding:6px">' + badge(r.status) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">備考</td><td colspan="3" style="padding:6px">' + esc(r.note || '-') + '</td></tr>' +
                     '</tbody></table>' +
                     '<div style="margin-top:16px"><label class="rca-label">ステータス変更</label><select class="rca-select" id="rca-res-status-change" style="width:200px;display:inline-block">' +
                     '<option value="pending"' + (r.status === 'pending' ? ' selected' : '') + '>保留中</option>' +
@@ -237,36 +403,6 @@
         });
     }
 
-    /* ── Prices ────────────────────────────────────────── */
-    function loadPrices() {
-        var html = '<div class="rca-toolbar"><button class="rca-btn rca-btn-primary" id="rca-add-price">+ 料金プランを追加</button></div><div id="rca-prices-table"></div>';
-        $app.html(html);
-        function refresh() {
-            api('GET', '/admin/prices').done(function (items) {
-                var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>ID</th><th>車両ID</th><th>タイプ</th><th>ラベル</th><th>期間</th><th>金額</th><th>操作</th></tr></thead><tbody>';
-                items.forEach(function (p) {
-                    var period = p.date_from ? esc(p.date_from) + ' ～ ' + esc(p.date_to) : '-';
-                    t += '<tr><td>' + p.id + '</td><td>' + p.vehicle_id + '</td><td>' + esc(p.price_type) + '</td><td>' + esc(p.label) + '</td><td>' + period + '</td><td>' + formatPrice(p.amount) + '</td><td><button class="rca-btn rca-btn-sm rca-btn-danger rca-del-price" data-id="' + p.id + '">削除</button></td></tr>';
-                });
-                t += '</tbody></table></div>';
-                $('#rca-prices-table').html(t);
-            });
-        }
-        refresh();
-        $('#rca-add-price').on('click', function () {
-            var vid = prompt('車両ID:'); if (!vid) return;
-            var type = prompt('タイプ (base/daily/hourly/season):', 'daily'); if (!type) return;
-            var label = prompt('ラベル:', '通常料金');
-            var amount = prompt('金額（円）:', '5000');
-            api('POST', '/admin/prices', { vehicle_id: parseInt(vid), price_type: type, label: label, amount: parseInt(amount) })
-                .done(function () { toast('追加しました'); refresh(); });
-        });
-        $(document).on('click', '.rca-del-price', function () {
-            if (!confirm('削除しますか？')) return;
-            api('DELETE', '/admin/prices/' + $(this).data('id')).done(function () { toast('削除しました'); refresh(); });
-        });
-    }
-
     /* ── Options ───────────────────────────────────────── */
     function loadOptions() {
         var html = '<div class="rca-toolbar"><button class="rca-btn rca-btn-primary" id="rca-add-option">+ オプション追加</button></div><div id="rca-options-table"></div>';
@@ -275,7 +411,7 @@
             api('GET', '/admin/options').done(function (items) {
                 var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>ID</th><th>名前</th><th>金額</th><th>単位</th><th>状態</th><th>操作</th></tr></thead><tbody>';
                 items.forEach(function (o) {
-                    t += '<tr><td>' + o.id + '</td><td>' + esc(o.name) + '</td><td>' + formatPrice(o.amount) + '</td><td>' + esc(o.unit) + '</td><td>' + badge(o.status === 'published' ? 'confirmed' : 'cancelled') + '</td>' +
+                    t += '<tr><td>' + o.id + '</td><td>' + esc(o.name) + '</td><td>' + formatPrice(o.amount) + '</td><td>' + esc(o.unit === 'per_day' ? '日額' : '予約毎') + '</td><td>' + badge(o.status === 'published' ? 'confirmed' : 'cancelled') + '</td>' +
                         '<td><button class="rca-btn rca-btn-sm rca-btn-danger rca-del-option" data-id="' + o.id + '">削除</button></td></tr>';
                 });
                 t += '</tbody></table></div>';
@@ -292,39 +428,6 @@
         $(document).on('click', '.rca-del-option', function () {
             if (!confirm('削除しますか？')) return;
             api('DELETE', '/admin/options/' + $(this).data('id')).done(function () { toast('削除しました'); refresh(); });
-        });
-    }
-
-    /* ── Slots ─────────────────────────────────────────── */
-    function loadSlots() {
-        var html = '<div class="rca-toolbar"><div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">車両ID</label><input type="number" class="rca-input" id="rca-slot-vid" value="1" style="width:80px"></div>' +
-            '<div class="rca-form-group"><label class="rca-label">開始日</label><input type="date" class="rca-input" id="rca-slot-from"></div>' +
-            '<div class="rca-form-group"><label class="rca-label">終了日</label><input type="date" class="rca-input" id="rca-slot-to"></div>' +
-            '<div class="rca-form-group"><button class="rca-btn rca-btn-primary" id="rca-slot-load" style="margin-top:20px">表示</button></div></div></div>' +
-            '<div class="rca-toolbar" style="margin-top:8px"><div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">一括設定: 台数</label><input type="number" class="rca-input" id="rca-slot-bulk-cap" value="1" style="width:80px" min="0"></div>' +
-            '<div class="rca-form-group"><button class="rca-btn rca-btn-primary" id="rca-slot-bulk" style="margin-top:20px">一括適用</button></div></div></div>' +
-            '<div id="rca-slot-table"></div>';
-        $app.html(html);
-        var today = new Date().toISOString().split('T')[0];
-        var future = new Date(Date.now() + 30*86400000).toISOString().split('T')[0];
-        $('#rca-slot-from').val(today); $('#rca-slot-to').val(future);
-
-        function refresh() {
-            var vid = $('#rca-slot-vid').val(), from = $('#rca-slot-from').val(), to = $('#rca-slot-to').val();
-            api('GET', '/admin/slots', { vehicle_id: vid, from: from, to: to }).done(function (d) {
-                var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>日付</th><th>容量</th><th>予約済み</th><th>空き</th><th>状態</th></tr></thead><tbody>';
-                Object.keys(d.days).sort().forEach(function (date) {
-                    var day = d.days[date];
-                    t += '<tr><td>' + date + '</td><td>' + day.capacity + '</td><td>' + day.booked + '</td><td>' + day.available + '</td><td>' + badge(day.status === 'available' ? 'confirmed' : day.status === 'few' ? 'pending' : day.status === 'holiday' ? 'cancelled' : 'cancelled') + '</td></tr>';
-                });
-                t += '</tbody></table></div>';
-                $('#rca-slot-table').html(t);
-            });
-        }
-        $('#rca-slot-load').on('click', refresh);
-        $('#rca-slot-bulk').on('click', function () {
-            var vid = $('#rca-slot-vid').val(), from = $('#rca-slot-from').val(), to = $('#rca-slot-to').val(), cap = $('#rca-slot-bulk-cap').val();
-            api('POST', '/admin/slots/bulk', { vehicle_id: parseInt(vid), from: from, to: to, capacity: parseInt(cap) }).done(function (d) { toast(d.count + '日分更新しました'); refresh(); });
         });
     }
 
@@ -351,19 +454,6 @@
         $(document).on('click', '.rca-del-holiday', function () {
             if (!confirm('削除しますか？')) return;
             api('DELETE', '/admin/holidays/' + $(this).data('id')).done(function () { toast('削除しました'); refresh(); });
-        });
-    }
-
-    /* ── Payments ──────────────────────────────────────── */
-    function loadPayments() {
-        $app.html('<div id="rca-payments-table"></div>');
-        api('GET', '/admin/payments', { per_page: 50 }).done(function (d) {
-            var t = '<div class="rca-table-wrap"><table class="rca-table"><thead><tr><th>ID</th><th>予約番号</th><th>お客様</th><th>ゲートウェイ</th><th>金額</th><th>ステータス</th><th>日時</th></tr></thead><tbody>';
-            d.items.forEach(function (p) {
-                t += '<tr><td>' + p.id + '</td><td>' + esc(p.reservation_code) + '</td><td>' + esc(p.customer_name) + '</td><td>' + esc(p.gateway) + '</td><td>' + formatPrice(p.amount) + '</td><td>' + badge(p.status) + '</td><td>' + esc(p.created_at) + '</td></tr>';
-            });
-            t += '</tbody></table></div>';
-            $app.html(t);
         });
     }
 
@@ -419,7 +509,7 @@
         });
     }
 
-    /* ── Settings ──────────────────────────────────────── */
+    /* ── Settings (no payment/Square sections) ────────── */
     function loadSettings() {
         api('GET', '/admin/settings').done(function (s) {
             var html = '<form id="rca-settings-form">' +
@@ -428,19 +518,11 @@
                 '<div class="rca-form-group"><label class="rca-label">電話番号</label><input class="rca-input" name="store_tel" value="' + esc(s.store_tel) + '"></div></div>' +
                 '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">メールアドレス</label><input class="rca-input" name="store_email" value="' + esc(s.store_email) + '"></div>' +
                 '<div class="rca-form-group"><label class="rca-label">住所</label><input class="rca-input" name="store_address" value="' + esc(s.store_address) + '"></div></div>' +
-                '<div class="rca-form-group"><label class="rca-label">営業時間</label><div class="rca-form-row"><input class="rca-input" name="business_hours_start" value="' + esc(s.business_hours_start) + '" style="width:120px"> ～ <input class="rca-input" name="business_hours_end" value="' + esc(s.business_hours_end) + '" style="width:120px"></div></div>' +
+                '<div class="rca-form-group"><label class="rca-label">営業時間</label><div class="rca-form-row"><input class="rca-input" name="business_hours_start" value="' + esc(s.business_hours_start) + '" style="width:120px"> <span style="line-height:36px">～</span> <input class="rca-input" name="business_hours_end" value="' + esc(s.business_hours_end) + '" style="width:120px"></div></div>' +
                 '<h3 class="rca-section-title">reCAPTCHA v3</h3>' +
                 '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">サイトキー</label><input class="rca-input" name="recaptcha_site_key" value="' + esc(s.recaptcha_site_key) + '"></div>' +
                 '<div class="rca-form-group"><label class="rca-label">シークレットキー</label><input class="rca-input" name="recaptcha_secret_key" value="' + esc(s.recaptcha_secret_key) + '"></div></div>' +
                 '<div class="rca-form-group"><label class="rca-label">スコア閾値</label><input class="rca-input" name="recaptcha_score" value="' + esc(s.recaptcha_score) + '" style="width:100px"></div>' +
-                '<h3 class="rca-section-title">決済設定</h3>' +
-                '<div class="rca-form-row"><div class="rca-form-group"><label><input type="checkbox" name="payment_onsite_enabled" value="1"' + (s.payment_onsite_enabled == '1' ? ' checked' : '') + '> 現地決済を有効にする</label></div>' +
-                '<div class="rca-form-group"><label><input type="checkbox" name="payment_square_enabled" value="1"' + (s.payment_square_enabled == '1' ? ' checked' : '') + '> Square決済を有効にする</label></div></div>' +
-                '<h3 class="rca-section-title">Square API（オプション）</h3>' +
-                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">Application ID</label><input class="rca-input" name="square_application_id" value="' + esc(s.square_application_id) + '"></div>' +
-                '<div class="rca-form-group"><label class="rca-label">Location ID</label><input class="rca-input" name="square_location_id" value="' + esc(s.square_location_id) + '"></div></div>' +
-                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">Access Token' + (s.square_access_token_set ? ' (設定済み)' : '') + '</label><input class="rca-input" name="square_access_token" placeholder="変更する場合のみ入力"></div>' +
-                '<div class="rca-form-group"><label><input type="checkbox" name="square_sandbox_mode" value="1"' + (s.square_sandbox_mode == '1' ? ' checked' : '') + '> サンドボックスモード</label></div></div>' +
                 '<h3 class="rca-section-title">その他</h3>' +
                 '<div class="rca-form-group"><label class="rca-label">レート制限（1分あたり）</label><input class="rca-input" name="rate_limit_per_minute" value="' + esc(s.rate_limit_per_minute) + '" style="width:100px"></div>' +
                 '<div style="margin-top:20px"><button type="submit" class="rca-btn rca-btn-primary">設定を保存</button></div>' +

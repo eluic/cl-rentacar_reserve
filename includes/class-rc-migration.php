@@ -35,7 +35,15 @@ class RC_Migration {
      */
     private static function get_migrations() {
         return array(
-            // '1.1.0' => 'migrate_to_1_1_0',
+            '1.1.0' => 'migrate_to_1_1_0',
         );
+    }
+
+    /**
+     * Migration 1.1.0: Add vehicle_blocks table.
+     */
+    private static function migrate_to_1_1_0() {
+        // vehicle_blocks table is created by dbDelta in RC_Activator::create_tables()
+        // which is called at the end of run(). No additional manual SQL needed.
     }
 }

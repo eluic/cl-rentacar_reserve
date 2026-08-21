@@ -52,14 +52,27 @@ class RC_Rest_Availability {
 
         while ( $current <= $end_dt ) {
             $date = $current->format( 'Y-m-d' );
-            $avail = RC_Model_Slot::get_availability( $vehicle_id, $date );
-            $days[ $date ] = array(
-                'date'      => $date,
-                'capacity'  => $avail['capacity'],
-                'booked'    => $avail['booked'],
-                'available' => $avail['available'],
-                'status'    => $avail['status'],
-            );
+
+            // Check if vehicle is blocked (maintenance) on this date
+            $is_blocked = RC_Model_Vehicle_Block::is_blocked( $vehicle_id, $date, $date );
+            if ( $is_blocked ) {
+                $days[ $date ] = array(
+                    'date'      => $date,
+                    'capacity'  => 0,
+                    'booked'    => 0,
+                    'available' => 0,
+                    'status'    => 'blocked',
+                );
+            } else {
+                $avail = RC_Model_Slot::get_availability( $vehicle_id, $date );
+                $days[ $date ] = array(
+                    'date'      => $date,
+                    'capacity'  => $avail['capacity'],
+                    'booked'    => $avail['booked'],
+                    'available' => $avail['available'],
+                    'status'    => $avail['status'],
+                );
+            }
             $current->modify( '+1 day' );
         }
 

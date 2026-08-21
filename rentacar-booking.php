@@ -3,7 +3,7 @@
  * Plugin Name:       Rentacar Booking
  * Plugin URI:        https://example.com/rentacar-booking
  * Description:       レンタカー予約システム — 車両管理・予約管理・決済・メール通知を一括管理
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            CL Rentacar
  * Author URI:        https://example.com
  * License:           GPL-2.0-or-later
@@ -39,6 +39,7 @@ require_once __DIR__ . '/includes/class-rc-mailer.php';
 require_once __DIR__ . '/includes/models/class-rc-model-vehicle.php';
 require_once __DIR__ . '/includes/models/class-rc-model-reservation.php';
 require_once __DIR__ . '/includes/models/class-rc-model-slot.php';
+require_once __DIR__ . '/includes/models/class-rc-model-vehicle-block.php';
 require_once __DIR__ . '/includes/models/class-rc-model-price.php';
 require_once __DIR__ . '/includes/models/class-rc-model-option.php';
 require_once __DIR__ . '/includes/models/class-rc-model-payment.php';
@@ -64,9 +65,9 @@ require_once __DIR__ . '/includes/rest/class-rc-rest-webhook-square.php';
 
 /* ── Admin REST controllers ─────────────────────────── */
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-vehicles.php';
-require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-prices.php';
+require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-vehicle-prices.php';
+require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-vehicle-blocks.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-options.php';
-require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-slots.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-holidays.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-reservations.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-payments.php';

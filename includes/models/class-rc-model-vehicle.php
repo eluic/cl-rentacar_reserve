@@ -174,6 +174,8 @@ class RC_Model_Vehicle {
         $wpdb->delete( rc_table( 'prices' ), array( 'vehicle_id' => $id ) );
         // Delete related slots
         $wpdb->delete( rc_table( 'slots' ), array( 'vehicle_id' => $id ) );
+        // Delete related blocks
+        $wpdb->delete( rc_table( 'vehicle_blocks' ), array( 'vehicle_id' => $id ) );
         // Delete vehicle
         return false !== $wpdb->delete( rc_table( 'vehicles' ), array( 'id' => $id ) );
     }

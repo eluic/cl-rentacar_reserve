@@ -4,7 +4,7 @@ Tags: rental car, booking, reservation, vehicle, japan
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,12 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. 固定ページに [rentacar_booking] と [rentacar_cancel] を配置
 
 == Changelog ==
+
+= 1.1.0 =
+* 管理画面の構造変更（決済管理・料金プラン・在庫カレンダーを削除）
+* 期間別料金設定を車両編集モーダルに統合
+* メンテナンスブロック機能を追加
+* 決済ステータス表示を削除（現地決済のみ対応）
 
 = 1.0.0 =
 * 初回リリース
