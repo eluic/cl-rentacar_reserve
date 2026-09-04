@@ -426,7 +426,7 @@
                     '<tr><td style="padding:6px;font-weight:700">お名前</td><td style="padding:6px">' + esc(r.customer_name) + '</td><td style="padding:6px;font-weight:700">フリガナ</td><td style="padding:6px">' + esc(r.customer_kana) + '</td></tr>' +
                     '<tr><td style="padding:6px;font-weight:700">メール</td><td style="padding:6px">' + esc(r.customer_email) + '</td><td style="padding:6px;font-weight:700">電話</td><td style="padding:6px">' + esc(r.customer_tel) + '</td></tr>' +
                     '<tr><td style="padding:6px;font-weight:700">郵便番号</td><td style="padding:6px">' + esc(r.customer_zip) + '</td><td style="padding:6px;font-weight:700">住所</td><td style="padding:6px">' + esc(r.customer_address) + '</td></tr>' +
-                    '<tr><td style="padding:6px;font-weight:700">免許証番号</td><td style="padding:6px">' + esc(r.license_no) + '</td><td style="padding:6px;font-weight:700">車両</td><td style="padding:6px">' + esc(r.vehicle_name) + '</td></tr>' +
+                    '<tr><td style="padding:6px;font-weight:700">車両</td><td colspan="3" style="padding:6px">' + esc(r.vehicle_name) + '</td></tr>' +
                     '<tr><td style="padding:6px;font-weight:700">貸出日時</td><td style="padding:6px">' + esc(r.pickup_at) + '</td><td style="padding:6px;font-weight:700">返却日時</td><td style="padding:6px">' + esc(r.return_at) + '</td></tr>' +
                     '<tr><td style="padding:6px;font-weight:700">合計金額</td><td style="padding:6px">' + formatPrice(r.total_amount) + '</td><td style="padding:6px;font-weight:700">ステータス</td><td style="padding:6px">' + badge(r.status) + '</td></tr>' +
                     '<tr><td style="padding:6px;font-weight:700">備考</td><td colspan="3" style="padding:6px">' + esc(r.note || '-') + '</td></tr>' +
