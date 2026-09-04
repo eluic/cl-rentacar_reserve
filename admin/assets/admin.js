@@ -147,7 +147,16 @@
                 '<div class="rca-form-group"><label class="rca-label">ミッション</label><select class="rca-select" id="rv-transmission"><option value="AT">AT</option><option value="MT">MT</option><option value="CVT">CVT</option></select></div></div>' +
                 '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">車両クラス</label><input class="rca-input" id="rv-class"></div>' +
                 '<div class="rca-form-group"><label class="rca-label">ステータス</label><select class="rca-select" id="rv-status"><option value="published">公開</option><option value="private">非公開</option></select></div></div>' +
-                '<div class="rca-form-group"><label class="rca-label">サムネイル画像ID</label><input type="number" class="rca-input" id="rv-thumb" value="0"><small style="color:#999">WPメディアライブラリのIDを入力</small></div>' +
+                '<div class="rca-form-group"><label class="rca-label">車両画像</label>' +
+                '<div id="rv-thumb-wrap" style="display:flex;align-items:center;gap:12px;margin-top:4px">' +
+                '<div id="rv-thumb-preview" style="width:120px;height:80px;border:2px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f8f9fa;flex-shrink:0">' +
+                '<span style="color:#bbb;font-size:12px" id="rv-thumb-placeholder">画像なし</span></div>' +
+                '<div style="display:flex;flex-direction:column;gap:6px">' +
+                '<button type="button" class="rca-btn rca-btn-secondary rca-btn-sm" id="rv-thumb-select" style="white-space:nowrap">メディアライブラリから選択</button>' +
+                '<button type="button" class="rca-btn rca-btn-sm" id="rv-thumb-clear" style="white-space:nowrap;background:#eee;color:#666;display:none">クリア</button>' +
+                '</div></div>' +
+                '<input type="hidden" id="rv-thumb" value="0">' +
+                '</div>' +
                 '<input type="hidden" id="rv-id" value="0">' +
                 pricingSection +
                 '<div class="rca-modal-footer" style="margin-top:20px"><button class="rca-btn rca-btn-secondary" id="rca-vehicle-cancel">閉じる</button><button class="rca-btn rca-btn-primary" id="rca-vehicle-save">車両情報を保存</button></div>' +
@@ -167,10 +176,47 @@
                     $('#rv-class').val((v.meta && v.meta.vehicle_class) || '');
                     $('#rv-status').val(v.status);
                     $('#rv-thumb').val(v.thumbnail_id);
+                    if (v.thumbnail_url) {
+                        $('#rv-thumb-preview').html('<img src="' + v.thumbnail_url + '" style="width:100%;height:100%;object-fit:cover">');
+                        $('#rv-thumb-clear').show();
+                    }
                 });
                 // Load pricing inline
                 refreshVehiclePricing(id);
             }
+
+            // Media library picker
+            $('#rv-thumb-select').on('click', function () {
+                if (typeof wp !== 'undefined' && wp.media) {
+                    var frame = wp.media({
+                        title: '車両画像を選択',
+                        button: { text: '決定する' },
+                        multiple: false,
+                        library: { type: 'image' }
+                    });
+                    frame.on('select', function () {
+                        var att = frame.state().get('selection').first().toJSON();
+                        $('#rv-thumb').val(att.id);
+                        var url = (att.sizes && att.sizes.medium) ? att.sizes.medium.url : att.url;
+                        $('#rv-thumb-preview').html('<img src="' + url + '" style="width:100%;height:100%;object-fit:cover">');
+                        $('#rv-thumb-clear').show();
+                    });
+                    frame.open();
+                } else {
+                    // Fallback for non-WP environments (preview)
+                    var url = prompt('画像URLを入力してください:');
+                    if (url) {
+                        $('#rv-thumb').val(1);
+                        $('#rv-thumb-preview').html('<img src="' + url + '" style="width:100%;height:100%;object-fit:cover">');
+                        $('#rv-thumb-clear').show();
+                    }
+                }
+            });
+            $('#rv-thumb-clear').on('click', function () {
+                $('#rv-thumb').val(0);
+                $('#rv-thumb-preview').html('<span style="color:#bbb;font-size:12px" id="rv-thumb-placeholder">画像なし</span>');
+                $(this).hide();
+            });
 
             $('#rca-vehicle-cancel').on('click', function () { $('#rca-vehicle-modal').remove(); });
             $('#rca-vehicle-save').on('click', function () {
