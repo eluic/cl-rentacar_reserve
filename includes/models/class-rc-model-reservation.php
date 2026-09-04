@@ -192,7 +192,6 @@ class RC_Model_Reservation {
             'customer_email'   => '',
             'customer_zip'     => '',
             'customer_address' => '',
-            'license_no'       => '',
             'total_amount'     => 0,
             'note'             => '',
             'raw_payload'      => '',

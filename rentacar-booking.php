@@ -3,7 +3,7 @@
  * Plugin Name:       Rentacar Booking
  * Plugin URI:        https://example.com/rentacar-booking
  * Description:       レンタカー予約システム — 車両管理・予約管理・決済・メール通知を一括管理
- * Version:           1.1.0
+ * Version:           1.1.1
  * Author:            CL Rentacar
  * Author URI:        https://example.com
  * License:           GPL-2.0-or-later

@@ -37,7 +37,10 @@
                 data = null;
             }
             xhr.open(method, url, true);
-            xhr.setRequestHeader('X-WP-Nonce', D.nonce);
+            // Only send WP nonce in real WP environment
+            if (D.nonce && D.nonce !== 'preview-nonce') {
+                xhr.setRequestHeader('X-WP-Nonce', D.nonce);
+            }
             if (method !== 'GET') {
                 xhr.setRequestHeader('Content-Type', 'application/json');
             }
@@ -161,15 +164,15 @@
         var html = '';
         state.vehicles.forEach(function (v) {
             var img = v.thumbnail
-                ? '<img class="rc-vehicle-img" src="' + escHTML(v.thumbnail) + '" alt="' + escHTML(v.name) + '">'
+                ? '<img class="rc-vehicle-img" src="' + escHTML(v.thumbnail) + '" alt="' + escHTML(v.name) + '" loading="lazy">'
                 : '<div class="rc-vehicle-img-placeholder">&#128663;</div>';
             html += '<div class="rc-vehicle-card" data-id="' + v.id + '">' +
                 img +
                 '<div class="rc-vehicle-info">' +
                 '<div class="rc-vehicle-name">' + escHTML(v.name) + '</div>' +
                 '<div class="rc-vehicle-meta">' +
-                '<span class="rc-vehicle-meta-item"><span class="rc-vehicle-meta-icon">&#128100;</span>' + v.seats + i18n.seats + '</span>' +
-                '<span class="rc-vehicle-meta-item"><span class="rc-vehicle-meta-icon">&#9881;</span>' + escHTML(v.transmission) + '</span>' +
+                '<span class="rc-vehicle-meta-item"><span class="rc-vehicle-meta-icon">👤</span>' + v.seats + i18n.seats + '</span>' +
+                '<span class="rc-vehicle-meta-item"><span class="rc-vehicle-meta-icon">⚙️</span>' + escHTML(v.transmission) + '</span>' +
                 '</div>' +
                 '<div class="rc-vehicle-price">' + formatPrice(v.base_price) +
                 '<span class="rc-vehicle-price-unit"> ' + i18n.perDay + '</span></div>' +
@@ -208,8 +211,13 @@
     }
 
     var flatpickrInstances = {};
+    var flatpickrInitialized = false;
     function initFlatpickr() {
+        if (flatpickrInitialized) return;
         if (!state.selectedVehicle) return;
+        if (typeof flatpickr === 'undefined') return;
+        flatpickrInitialized = true;
+
         var sv = state.selectedVehicle;
         $('#rc-selected-vehicle-summary').innerHTML =
             '<strong>' + escHTML(sv.name) + '</strong> — ' + sv.seats + i18n.seats + ' / ' + escHTML(sv.transmission) + ' / ' + formatPrice(sv.base_price) + i18n.perDay;
@@ -374,8 +382,7 @@
             { name: 'customer_email', label: 'メールアドレス' },
             { name: 'customer_tel', label: '電話番号' },
             { name: 'customer_zip', label: '郵便番号' },
-            { name: 'customer_address', label: '住所' },
-            { name: 'license_no', label: '免許証番号' }
+            { name: 'customer_address', label: '住所' }
         ];
 
         fields.forEach(function (f) {
@@ -410,7 +417,6 @@
             customer_tel: form.querySelector('[name="customer_tel"]').value.trim(),
             customer_zip: form.querySelector('[name="customer_zip"]').value.trim(),
             customer_address: form.querySelector('[name="customer_address"]').value.trim(),
-            license_no: form.querySelector('[name="license_no"]').value.trim(),
             note: form.querySelector('[name="note"]').value.trim()
         };
     }
@@ -461,7 +467,6 @@
             '<div class="rc-confirm-row"><span class="rc-confirm-label">電話番号</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_tel) + '</span></div>' +
             '<div class="rc-confirm-row"><span class="rc-confirm-label">郵便番号</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_zip) + '</span></div>' +
             '<div class="rc-confirm-row"><span class="rc-confirm-label">住所</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_address) + '</span></div>' +
-            '<div class="rc-confirm-row"><span class="rc-confirm-label">免許証番号</span><span class="rc-confirm-value">' + escHTML(state.customer.license_no) + '</span></div>' +
             '</div>';
 
         html += '<div class="rc-confirm-total">' + i18n.totalAmount + ': ' + formatPrice(state.totalAmount) + '</div>';
@@ -513,7 +518,7 @@
             recaptcha_token: ''
         });
 
-        // reCAPTCHA
+        // reCAPTCHA (skipped in preview mode)
         var submitWithToken = function (token) {
             payload.recaptcha_token = token || '';
             ajax('POST', '/reservations', payload).then(function (res) {

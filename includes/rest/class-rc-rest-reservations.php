@@ -43,7 +43,7 @@ class RC_Rest_Reservations {
         }
 
         // Validate required fields
-        $required = array( 'vehicle_id', 'pickup_at', 'return_at', 'customer_name', 'customer_kana', 'customer_email', 'customer_tel', 'customer_zip', 'customer_address', 'license_no' );
+        $required = array( 'vehicle_id', 'pickup_at', 'return_at', 'customer_name', 'customer_kana', 'customer_email', 'customer_tel', 'customer_zip', 'customer_address' );
         foreach ( $required as $field ) {
             if ( empty( $params[ $field ] ) ) {
                 return new WP_Error( 'validation', $field . ' は必須です。', array( 'status' => 400 ) );
@@ -133,7 +133,6 @@ class RC_Rest_Reservations {
             'customer_email'   => $email,
             'customer_zip'     => rc_sanitize_zip( $params['customer_zip'] ),
             'customer_address' => sanitize_textarea_field( $params['customer_address'] ),
-            'license_no'       => sanitize_text_field( $params['license_no'] ),
             'total_amount'     => $total_amount,
             'note'             => isset( $params['note'] ) ? sanitize_textarea_field( $params['note'] ) : '',
             'raw_payload'      => wp_json_encode( $params, JSON_UNESCAPED_UNICODE ),

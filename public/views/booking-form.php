@@ -122,13 +122,6 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </div>
             </div>
             <div class="rc-form-row">
-                <div class="rc-form-group">
-                    <label class="rc-label rc-required">免許証番号</label>
-                    <input type="text" name="license_no" class="rc-input" placeholder="免許証番号を入力" required>
-                    <span class="rc-error-msg"></span>
-                </div>
-            </div>
-            <div class="rc-form-row">
                 <div class="rc-form-group rc-form-group-full">
                     <label class="rc-label">備考</label>
                     <textarea name="note" class="rc-textarea" rows="3" placeholder="ご要望がございましたらご記入ください"></textarea>

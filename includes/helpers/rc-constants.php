@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /* ── Version ─────────────────────────────────────────── */
-define( 'RC_PLUGIN_VERSION',  '1.1.0' );
+define( 'RC_PLUGIN_VERSION',  '1.1.1' );
 define( 'RC_DB_VERSION',      '1.1.0' );
 
 /* ── Paths ───────────────────────────────────────────── */
