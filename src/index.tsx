@@ -74,13 +74,34 @@ const options = [
   { id: 7, name: 'Wi-Fiルーター', description: 'モバイルWi-Fi（データ無制限）', amount: 880, unit: 'per_day', status: 'active' }
 ]
 
-// Generate availability for the next 3 months
+// Count how many reservations overlap a given date for a given vehicle
+function countBookedOnDate(vehicleId: number, dateStr: string): number {
+  const d = new Date(dateStr + 'T12:00:00')
+  let count = 0
+  for (const r of mockReservations) {
+    if (r.vehicle_id !== vehicleId) continue
+    if (r.status === 'cancelled') continue
+    const pickup = new Date(r.pickup_at)
+    const ret = new Date(r.return_at)
+    pickup.setHours(0, 0, 0, 0)
+    ret.setHours(23, 59, 59, 999)
+    if (d >= pickup && d <= ret) count++
+  }
+  return count
+}
+
+// Generate availability for a month, reflecting actual reservations & blocks
 function generateAvailability(vehicleId: number, month: string) {
+  const vehicle = vehicles.find(v => v.id === vehicleId)
+  const stock = vehicle ? 2 : 0 // each vehicle has 2 units in demo
   const days: Record<string, { status: string; remaining: number }> = {}
   const [year, mon] = month.split('-').map(Number)
   const daysInMonth = new Date(year, mon, 0).getDate()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+
+  // Check vehicle blocks
+  const blocks = mockVehicleBlocks.filter((b: any) => b.vehicle_id === vehicleId)
 
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(year, mon - 1, d)
@@ -97,14 +118,23 @@ function generateAvailability(vehicleId: number, month: string) {
       continue
     }
 
-    // Pseudo-random availability based on date + vehicleId
-    const seed = (d * 7 + vehicleId * 13 + mon * 3) % 10
-    if (seed < 5) {
-      days[dateStr] = { status: 'available', remaining: 3 }
-    } else if (seed < 8) {
-      days[dateStr] = { status: 'few', remaining: 1 }
-    } else {
+    // Check maintenance blocks
+    const isBlocked = blocks.some((b: any) => dateStr >= b.date_from && dateStr <= b.date_to)
+    if (isBlocked) {
+      days[dateStr] = { status: 'blocked', remaining: 0 }
+      continue
+    }
+
+    // Count existing reservations for this vehicle on this date
+    const booked = countBookedOnDate(vehicleId, dateStr)
+    const remaining = Math.max(0, stock - booked)
+
+    if (remaining <= 0) {
       days[dateStr] = { status: 'full', remaining: 0 }
+    } else if (remaining <= 1) {
+      days[dateStr] = { status: 'few', remaining }
+    } else {
+      days[dateStr] = { status: 'available', remaining }
     }
   }
   return days

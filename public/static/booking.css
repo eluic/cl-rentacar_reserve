@@ -129,6 +129,7 @@
 .flatpickr-day.rc-day-available { background: rgba(76,175,80,0.15); }
 .flatpickr-day.rc-day-few { background: rgba(255,152,0,0.2); }
 .flatpickr-day.rc-day-full { background: rgba(229,57,53,0.15); color: #aaa !important; pointer-events: none; }
+.flatpickr-day.rc-day-blocked { background: rgba(229,57,53,0.15); color: #aaa !important; pointer-events: none; }
 .flatpickr-day.rc-day-holiday { background: rgba(158,158,158,0.2); color: #aaa !important; pointer-events: none; text-decoration: line-through; }
 
 /* ── Options List ───────────────────────────────────── */
