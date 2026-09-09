@@ -240,6 +240,7 @@
             dateFormat: 'Y-m-d',
             minDate: 'today',
             disableMobile: true,
+            disable: [isDateDisabled],
             onDayCreate: function (dObj, dStr, fp, dayElem) {
                 colorDay(dayElem, sv.id);
             },
@@ -261,6 +262,7 @@
             dateFormat: 'Y-m-d',
             minDate: 'today',
             disableMobile: true,
+            disable: [isDateDisabled],
             onDayCreate: function (dObj, dStr, fp, dayElem) {
                 colorDay(dayElem, sv.id);
             },
@@ -302,6 +304,24 @@
 
         var s = days[dateStr].status;
         dayElem.classList.add('rc-day-' + s);
+
+        // Disable dates that are full, holiday, or blocked
+        if (s === 'full' || s === 'holiday' || s === 'blocked') {
+            dayElem.classList.add('flatpickr-disabled');
+            dayElem.setAttribute('aria-disabled', 'true');
+        }
+    }
+
+    /** Check if a date should be disabled based on availability cache */
+    function isDateDisabled(dateObj) {
+        if (!state.selectedVehicle) return false;
+        var dateStr = flatpickr.formatDate(dateObj, 'Y-m-d');
+        var monthKey = dateStr.substring(0, 7);
+        var cacheKey = state.selectedVehicle.id + '_' + monthKey;
+        var days = state.availabilityCache[cacheKey];
+        if (!days || !days[dateStr]) return false;
+        var s = days[dateStr].status;
+        return s === 'full' || s === 'holiday' || s === 'blocked';
     }
 
     function checkStep2Ready() {
