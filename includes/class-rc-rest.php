@@ -41,6 +41,7 @@ class RC_Rest {
             'RC_Rest_Admin_Options',
             'RC_Rest_Admin_Holidays',
             'RC_Rest_Admin_Reservations',
+            'RC_Rest_Admin_Analytics',
             'RC_Rest_Admin_Mail_Templates',
             'RC_Rest_Admin_Mail_Logs',
             'RC_Rest_Admin_Settings',

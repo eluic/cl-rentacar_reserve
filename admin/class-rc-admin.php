@@ -29,6 +29,7 @@ class RC_Admin {
 
         $submenus = array(
             array( 'rc-dashboard',       'ダッシュボード',       'render_page' ),
+            array( 'rc-analytics',       '分析レポート',        'render_page' ),
             array( 'rc-vehicles',        '車両管理',           'render_page' ),
             array( 'rc-reservations',    '予約管理',           'render_page' ),
             array( 'rc-options',         'オプション',         'render_page' ),

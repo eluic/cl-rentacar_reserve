@@ -3,7 +3,7 @@
  * Plugin Name:       Rentacar Booking
  * Plugin URI:        https://example.com/rentacar-booking
  * Description:       レンタカー予約システム — 車両管理・予約管理・決済・メール通知を一括管理
- * Version:           1.1.2
+ * Version:           1.1.3
  * Author:            CL Rentacar
  * Author URI:        https://example.com
  * License:           GPL-2.0-or-later
@@ -74,6 +74,7 @@ require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-payments.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-mail-templates.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-mail-logs.php';
 require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-settings.php';
+require_once __DIR__ . '/includes/rest/admin/class-rc-rest-admin-analytics.php';
 
 /* ── Admin ──────────────────────────────────────────── */
 require_once __DIR__ . '/admin/class-rc-admin.php';

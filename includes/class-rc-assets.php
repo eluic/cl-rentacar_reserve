@@ -261,10 +261,18 @@ class RC_Assets {
             array(),
             $ver
         );
+        // Chart.js for analytics page
+        wp_enqueue_script(
+            'chart-js',
+            'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',
+            array(),
+            '4.4.4',
+            true
+        );
         wp_enqueue_script(
             'rc-admin',
             $url . 'admin/assets/admin.js',
-            array( 'jquery', 'wp-api-fetch' ),
+            array( 'jquery', 'wp-api-fetch', 'chart-js' ),
             $ver,
             true
         );
