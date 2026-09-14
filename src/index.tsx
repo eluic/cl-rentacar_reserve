@@ -795,6 +795,162 @@ app.get('/api/rentacar/v1/admin/settings', (c) => c.json({
 app.post('/api/rentacar/v1/admin/settings', async (c) => c.json({ success: true }))
 app.post('/api/rentacar/v1/admin/settings/test-mail', async (c) => c.json({ success: true }))
 
+// Admin Analytics
+app.get('/api/rentacar/v1/admin/analytics', (c) => {
+  const period = c.req.query('period') || 'all' // all, this_month, last_month, last_3months, last_6months, this_year
+
+  // Filter reservations by period
+  function filterByPeriod(reservations: typeof mockReservations) {
+    const now = new Date()
+    const thisYear = now.getFullYear()
+    const thisMonth = now.getMonth() // 0-indexed
+
+    switch (period) {
+      case 'this_month': {
+        const start = new Date(thisYear, thisMonth, 1)
+        const end = new Date(thisYear, thisMonth + 1, 0, 23, 59, 59)
+        return reservations.filter(r => {
+          const d = new Date(r.pickup_at)
+          return d >= start && d <= end
+        })
+      }
+      case 'last_month': {
+        const start = new Date(thisYear, thisMonth - 1, 1)
+        const end = new Date(thisYear, thisMonth, 0, 23, 59, 59)
+        return reservations.filter(r => {
+          const d = new Date(r.pickup_at)
+          return d >= start && d <= end
+        })
+      }
+      case 'last_3months': {
+        const start = new Date(thisYear, thisMonth - 2, 1)
+        return reservations.filter(r => new Date(r.pickup_at) >= start)
+      }
+      case 'last_6months': {
+        const start = new Date(thisYear, thisMonth - 5, 1)
+        return reservations.filter(r => new Date(r.pickup_at) >= start)
+      }
+      case 'this_year': {
+        const start = new Date(thisYear, 0, 1)
+        return reservations.filter(r => new Date(r.pickup_at) >= start)
+      }
+      default:
+        return reservations
+    }
+  }
+
+  const filtered = filterByPeriod(mockReservations)
+
+  // ── Section 1: KPI Summary ──
+  const totalCount = filtered.length
+  const confirmedOrCompleted = filtered.filter(r => r.status === 'confirmed' || r.status === 'completed')
+  const cancelledCount = filtered.filter(r => r.status === 'cancelled').length
+  const totalSales = confirmedOrCompleted.reduce((sum, r) => sum + r.total_amount, 0)
+  const avgPrice = confirmedOrCompleted.length > 0 ? Math.round(totalSales / confirmedOrCompleted.length) : 0
+  const cancelRate = totalCount > 0 ? Math.round((cancelledCount / totalCount) * 100) : 0
+
+  // Utilization rate: (booked days across all vehicles) / (total available days * total vehicles)
+  // Simplified calculation
+  let totalBookedDays = 0
+  confirmedOrCompleted.forEach(r => {
+    const pickup = new Date(r.pickup_at)
+    const ret = new Date(r.return_at)
+    const days = Math.max(1, Math.ceil((ret.getTime() - pickup.getTime()) / (1000 * 60 * 60 * 24)))
+    totalBookedDays += days
+  })
+  const totalVehicles = vehicles.length
+  const daysInPeriod = 30 // Simplified: use 30 days
+  const utilizationRate = totalVehicles > 0 ? Math.min(100, Math.round((totalBookedDays / (totalVehicles * daysInPeriod)) * 100)) : 0
+
+  // Repeat customers
+  const emailCounts: Record<string, number> = {}
+  filtered.forEach(r => {
+    if (r.status !== 'cancelled') {
+      emailCounts[r.customer_email] = (emailCounts[r.customer_email] || 0) + 1
+    }
+  })
+  const repeatCustomers = Object.values(emailCounts).filter(c => c >= 2).length
+  const uniqueCustomers = Object.keys(emailCounts).length
+  const repeatRate = uniqueCustomers > 0 ? Math.round((repeatCustomers / uniqueCustomers) * 100) : 0
+
+  const summary = {
+    total_reservations: totalCount,
+    total_sales: totalSales,
+    avg_price: avgPrice,
+    cancel_rate: cancelRate,
+    utilization_rate: utilizationRate,
+    repeat_rate: repeatRate,
+    confirmed_count: confirmedOrCompleted.length,
+    cancelled_count: cancelledCount,
+    pending_count: filtered.filter(r => r.status === 'pending').length
+  }
+
+  // ── Section 2: Monthly Trends ──
+  const monthlyMap: Record<string, { count: number; sales: number; cancelled: number }> = {}
+  // Generate last 12 months for consistent chart
+  const now = new Date()
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    monthlyMap[key] = { count: 0, sales: 0, cancelled: 0 }
+  }
+  // Fill with actual data from ALL reservations (not filtered) for trend
+  mockReservations.forEach(r => {
+    const d = new Date(r.pickup_at)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    if (monthlyMap[key] !== undefined) {
+      monthlyMap[key].count++
+      if (r.status === 'confirmed' || r.status === 'completed') {
+        monthlyMap[key].sales += r.total_amount
+      }
+      if (r.status === 'cancelled') {
+        monthlyMap[key].cancelled++
+      }
+    }
+  })
+
+  const monthly_trends = Object.entries(monthlyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, data]) => ({
+      month,
+      label: `${parseInt(month.split('-')[1])}月`,
+      ...data
+    }))
+
+  // ── Section 3: Vehicle Analysis ──
+  const vehicleStats: Record<number, { name: string; count: number; sales: number; days: number }> = {}
+  vehicles.forEach(v => {
+    vehicleStats[v.id] = { name: v.name, count: 0, sales: 0, days: 0 }
+  })
+  confirmedOrCompleted.forEach(r => {
+    const stat = vehicleStats[r.vehicle_id]
+    if (stat) {
+      stat.count++
+      stat.sales += r.total_amount
+      const pickup = new Date(r.pickup_at)
+      const ret = new Date(r.return_at)
+      stat.days += Math.max(1, Math.ceil((ret.getTime() - pickup.getTime()) / (1000 * 60 * 60 * 24)))
+    }
+  })
+
+  const vehicle_analysis = Object.entries(vehicleStats).map(([id, stat]) => ({
+    vehicle_id: parseInt(id),
+    vehicle_name: stat.name,
+    reservation_count: stat.count,
+    total_sales: stat.sales,
+    total_days: stat.days,
+    avg_per_day: stat.days > 0 ? Math.round(stat.sales / stat.days) : 0,
+    utilization: Math.min(100, Math.round((stat.days / (daysInPeriod * 2)) * 100)) // 2 units per vehicle
+  })).sort((a, b) => b.total_sales - a.total_sales)
+
+  return c.json({
+    period,
+    summary,
+    monthly_trends,
+    vehicle_analysis
+  })
+})
+
 // Admin System Info
 app.get('/api/rentacar/v1/admin/settings/system', (c) => c.json({
   php_version: '8.2.20', wp_version: '6.6.1', plugin_version: '1.0.0', db_version: '1.0.0',
@@ -815,6 +971,7 @@ app.get('/api/rentacar/v1/admin/settings/system', (c) => c.json({
 
 const adminMenuItems = [
   { key: 'dashboard', icon: '📊', label: 'ダッシュボード' },
+  { key: 'analytics', icon: '📈', label: '分析レポート' },
   { key: 'reservations', icon: '📋', label: '予約管理' },
   { key: 'vehicles', icon: '🚗', label: '車両管理' },
 
@@ -849,6 +1006,7 @@ function adminPage(pageKey: string) {
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "Noto Sans JP","Hiragino Sans",sans-serif; background: #f0f2f5; color: #333; }

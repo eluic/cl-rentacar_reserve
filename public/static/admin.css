@@ -93,3 +93,30 @@
 .rca-toast { position: fixed; top: 32px; right: 32px; padding: 12px 20px; background: var(--rca-success); color: white; border-radius: 6px; z-index: 100001; animation: rca-fadeIn 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 .rca-toast-error { background: var(--rca-danger); }
 @keyframes rca-fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Analytics ──────────────────────────────────────── */
+.rca-analytics-kpi { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.rca-kpi-card { background: var(--rca-white); border-radius: 10px; padding: 18px 16px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 14px; transition: transform 0.15s, box-shadow 0.15s; }
+.rca-kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+.rca-kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.rca-kpi-data { flex: 1; min-width: 0; }
+.rca-kpi-value { font-size: 22px; font-weight: 700; color: #1e293b; line-height: 1.2; white-space: nowrap; }
+.rca-kpi-unit { font-size: 13px; font-weight: 500; color: #94a3b8; margin-left: 2px; }
+.rca-kpi-label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+.rca-status-mini { display: flex; gap: 10px; flex-wrap: wrap; }
+.rca-status-pill { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+.rca-analytics-section { margin-top: 8px; }
+
+/* Bar in vehicle table */
+.rca-bar-bg { background: #eee; border-radius: 4px; height: 22px; overflow: hidden; position: relative; }
+.rca-bar-fill { height: 100%; background: linear-gradient(90deg, #00bcd4, #26c6da); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; min-width: 28px; transition: width 0.4s ease; }
+
+/* Chart container */
+.rca-chart-container canvas { max-width: 100%; }
+
+@media (max-width: 900px) {
+    .rca-analytics-kpi { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .rca-analytics-section > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+}

@@ -42,6 +42,7 @@
 
     var pages = {
         dashboard: loadDashboard,
+        analytics: loadAnalytics,
         vehicles: loadVehicles,
         reservations: loadReservations,
         options: loadOptions,
@@ -82,6 +83,228 @@
             } else { html += '<p style="color:#999">本日の返却予約はありません。</p>'; }
             $app.html(html);
         });
+    }
+
+    /* ── Analytics ──────────────────────────────────────── */
+    function loadAnalytics() {
+        var chartInstances = {};
+
+        function destroyCharts() {
+            Object.keys(chartInstances).forEach(function (k) {
+                if (chartInstances[k]) { chartInstances[k].destroy(); chartInstances[k] = null; }
+            });
+        }
+
+        // Period filter
+        var html = '<div class="rca-toolbar" style="margin-bottom:20px">' +
+            '<div style="display:flex;align-items:center;gap:12px">' +
+            '<span style="font-size:14px;font-weight:600;color:#555">📅 期間:</span>' +
+            '<select class="rca-select" id="rca-analytics-period" style="width:180px">' +
+            '<option value="all">全期間</option>' +
+            '<option value="this_month">今月</option>' +
+            '<option value="last_month">先月</option>' +
+            '<option value="last_3months">過去3ヶ月</option>' +
+            '<option value="last_6months">過去6ヶ月</option>' +
+            '<option value="this_year">今年</option>' +
+            '</select></div></div>' +
+            '<div id="rca-analytics-content"><div class="rc-loading"><span class="rc-spinner"></span> 分析データを読み込み中...</div></div>';
+        $app.html(html);
+
+        function loadData(period) {
+            destroyCharts();
+            $('#rca-analytics-content').html('<div class="rc-loading">分析データを読み込み中...</div>');
+            api('GET', '/admin/analytics', { period: period }).done(function (d) {
+                renderAnalytics(d);
+            }).fail(function () {
+                $('#rca-analytics-content').html('<p style="color:red;text-align:center;padding:40px">データの取得に失敗しました</p>');
+            });
+        }
+
+        $('#rca-analytics-period').on('change', function () {
+            loadData($(this).val());
+        });
+        loadData('all');
+
+        function renderAnalytics(d) {
+            var s = d.summary;
+            var out = '';
+
+            // ── Section 1: KPI Summary Panels ──
+            out += '<div class="rca-analytics-kpi">' +
+                '<div class="rca-kpi-card">' +
+                  '<div class="rca-kpi-icon" style="background:#e3f2fd;color:#1565c0">📋</div>' +
+                  '<div class="rca-kpi-data"><div class="rca-kpi-value">' + s.total_reservations + '<span class="rca-kpi-unit">件</span></div><div class="rca-kpi-label">総予約件数</div></div></div>' +
+                '<div class="rca-kpi-card">' +
+                  '<div class="rca-kpi-icon" style="background:#e8f5e9;color:#2e7d32">💰</div>' +
+                  '<div class="rca-kpi-data"><div class="rca-kpi-value">' + formatPrice(s.total_sales) + '</div><div class="rca-kpi-label">総売上</div></div></div>' +
+                '<div class="rca-kpi-card">' +
+                  '<div class="rca-kpi-icon" style="background:#fff3e0;color:#e65100">📊</div>' +
+                  '<div class="rca-kpi-data"><div class="rca-kpi-value">' + formatPrice(s.avg_price) + '</div><div class="rca-kpi-label">平均単価</div></div></div>' +
+                '<div class="rca-kpi-card">' +
+                  '<div class="rca-kpi-icon" style="background:#fce4ec;color:#c62828">❌</div>' +
+                  '<div class="rca-kpi-data"><div class="rca-kpi-value">' + s.cancel_rate + '<span class="rca-kpi-unit">%</span></div><div class="rca-kpi-label">キャンセル率</div></div></div>' +
+                '<div class="rca-kpi-card">' +
+                  '<div class="rca-kpi-icon" style="background:#e0f7fa;color:#00838f">🚗</div>' +
+                  '<div class="rca-kpi-data"><div class="rca-kpi-value">' + s.utilization_rate + '<span class="rca-kpi-unit">%</span></div><div class="rca-kpi-label">稼働率</div></div></div>' +
+                '<div class="rca-kpi-card">' +
+                  '<div class="rca-kpi-icon" style="background:#f3e5f5;color:#7b1fa2">🔄</div>' +
+                  '<div class="rca-kpi-data"><div class="rca-kpi-value">' + s.repeat_rate + '<span class="rca-kpi-unit">%</span></div><div class="rca-kpi-label">リピート率</div></div></div>' +
+                '</div>';
+
+            // Status breakdown mini
+            out += '<div class="rca-status-mini" style="margin-bottom:24px">' +
+                '<span class="rca-status-pill" style="background:#e8f5e9;color:#2e7d32">確定/完了 ' + s.confirmed_count + '件</span>' +
+                '<span class="rca-status-pill" style="background:#fff3e0;color:#e65100">保留中 ' + s.pending_count + '件</span>' +
+                '<span class="rca-status-pill" style="background:#ffebee;color:#c62828">キャンセル ' + s.cancelled_count + '件</span>' +
+                '</div>';
+
+            // ── Section 2: Monthly Trends Chart ──
+            out += '<div class="rca-analytics-section">' +
+                '<h3 class="rca-section-title">📈 月別売上推移</h3>' +
+                '<div class="rca-chart-container" style="position:relative;height:320px;background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1)">' +
+                '<canvas id="rca-monthly-chart"></canvas></div></div>';
+
+            // ── Section 3: Vehicle Analysis ──
+            out += '<div class="rca-analytics-section" style="margin-top:24px">' +
+                '<h3 class="rca-section-title">🚗 車両別分析</h3>' +
+                '<div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start">' +
+                '<div class="rca-table-wrap"><table class="rca-table" id="rca-vehicle-analysis-table"><thead><tr>' +
+                '<th>車両名</th><th>予約数</th><th>売上</th><th>稼働日数</th><th>日額平均</th><th>稼働率</th></tr></thead><tbody>';
+
+            d.vehicle_analysis.forEach(function (v) {
+                var barWidth = Math.min(100, v.utilization);
+                out += '<tr><td style="font-weight:600;white-space:nowrap">' + esc(v.vehicle_name) + '</td>' +
+                    '<td style="text-align:center">' + v.reservation_count + '件</td>' +
+                    '<td style="text-align:right;font-weight:600">' + formatPrice(v.total_sales) + '</td>' +
+                    '<td style="text-align:center">' + v.total_days + '日</td>' +
+                    '<td style="text-align:right">' + formatPrice(v.avg_per_day) + '</td>' +
+                    '<td style="min-width:100px"><div class="rca-bar-bg"><div class="rca-bar-fill" style="width:' + barWidth + '%">' + v.utilization + '%</div></div></td></tr>';
+            });
+
+            out += '</tbody></table></div>' +
+                '<div style="background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1)">' +
+                '<div style="font-size:14px;font-weight:700;margin-bottom:12px;text-align:center;color:#555">売上構成比</div>' +
+                '<div style="position:relative;height:250px"><canvas id="rca-vehicle-pie"></canvas></div></div>' +
+                '</div></div>';
+
+            $('#rca-analytics-content').html(out);
+
+            // ── Render Charts ──
+            renderMonthlyChart(d.monthly_trends);
+            renderVehiclePie(d.vehicle_analysis);
+        }
+
+        function renderMonthlyChart(trends) {
+            var ctx = document.getElementById('rca-monthly-chart');
+            if (!ctx) return;
+            var labels = trends.map(function (t) { return t.label; });
+            var salesData = trends.map(function (t) { return t.sales; });
+            var countData = trends.map(function (t) { return t.count; });
+
+            chartInstances.monthly = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '売上 (¥)',
+                            data: salesData,
+                            backgroundColor: 'rgba(0, 188, 212, 0.6)',
+                            borderColor: '#00bcd4',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            label: '予約件数',
+                            data: countData,
+                            type: 'line',
+                            borderColor: '#ff9800',
+                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ff9800',
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    if (ctx.dataset.yAxisID === 'y') return '売上: ¥' + ctx.parsed.y.toLocaleString();
+                                    return '予約: ' + ctx.parsed.y + '件';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            title: { display: true, text: '売上 (¥)' },
+                            ticks: { callback: function (v) { return '¥' + v.toLocaleString(); } }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: { display: true, text: '予約件数' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderVehiclePie(vehicleData) {
+            var ctx = document.getElementById('rca-vehicle-pie');
+            if (!ctx) return;
+            var filtered = vehicleData.filter(function (v) { return v.total_sales > 0; });
+            if (!filtered.length) {
+                $(ctx).parent().html('<p style="text-align:center;color:#999;padding:40px">データなし</p>');
+                return;
+            }
+            var colors = ['#00bcd4', '#ff9800', '#4caf50', '#e53935', '#9c27b0', '#3f51b5', '#795548', '#607d8b'];
+            chartInstances.vehiclePie = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: filtered.map(function (v) { return v.vehicle_name.split(' (')[0]; }),
+                    datasets: [{
+                        data: filtered.map(function (v) { return v.total_sales; }),
+                        backgroundColor: colors.slice(0, filtered.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 10, usePointStyle: true, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    var total = ctx.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                                    var pct = total > 0 ? Math.round((ctx.parsed / total) * 100) : 0;
+                                    return ctx.label + ': ¥' + ctx.parsed.toLocaleString() + ' (' + pct + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '55%'
+                }
+            });
+        }
     }
 
     /* ── Vehicles (with Pricing & Blocks tabs) ────────── */
