@@ -170,12 +170,11 @@
                 img +
                 '<div class="rc-vehicle-info">' +
                 '<div class="rc-vehicle-name">' + escHTML(v.name) + '</div>' +
-                '<div class="rc-vehicle-meta">' +
-                '<span class="rc-vehicle-meta-item"><span class="rc-vehicle-meta-icon">👤</span>' + v.seats + i18n.seats + '</span>' +
-                '<span class="rc-vehicle-meta-item"><span class="rc-vehicle-meta-icon">⚙️</span>' + escHTML(v.transmission) + '</span>' +
-                '</div>' +
                 '<div class="rc-vehicle-price">' + formatPrice(v.base_price) +
-                '<span class="rc-vehicle-price-unit"> ' + i18n.perDay + '</span></div>' +
+                '<span class="rc-vehicle-price-unit">〜</span></div>' +
+                '</div>' +
+                '<div class="rc-vehicle-action">' +
+                '<button type="button" class="rc-vehicle-book-btn">予約する</button>' +
                 '</div></div>';
         });
         container.innerHTML = html;
