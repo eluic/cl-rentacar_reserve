@@ -207,6 +207,20 @@
 .rc-form-group-full { flex: 1; width: 100%; }
 .rc-error-msg { font-size: 12px; color: var(--rc-danger); margin-top: 4px; display: block; min-height: 16px; }
 
+/* ── Transport Section ──────────────────────────────── */
+.rc-transport-section { margin-top: 8px; margin-bottom: 16px; background: var(--rc-white); border-radius: var(--rc-radius); box-shadow: var(--rc-shadow); padding: 20px; }
+.rc-transport-title { font-size: 16px; font-weight: 700; color: var(--rc-text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 3px solid var(--rc-primary); }
+.rc-transport-table-wrap { overflow-x: auto; }
+.rc-transport-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rc-transport-table th { background: #f5f5f5; padding: 10px 12px; text-align: center; font-weight: 600; color: #555; border: 1px solid #e0e0e0; }
+.rc-transport-table td { padding: 10px 12px; border: 1px solid #e0e0e0; vertical-align: middle; }
+.rc-transport-label { font-weight: 700; text-align: center; background: #fafafa; white-space: nowrap; width: 70px; }
+.rc-transport-datetime { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rc-transport-time-group { display: flex; align-items: center; gap: 4px; }
+.rc-transport-colon { font-weight: 700; font-size: 14px; }
+.rc-input-sm { padding: 6px 10px; font-size: 13px; }
+.rc-select-sm { padding: 6px 8px; font-size: 13px; width: 70px; }
+
 /* ── Confirmation ───────────────────────────────────── */
 .rc-confirm-summary {
     background: var(--rc-white); border-radius: var(--rc-radius);

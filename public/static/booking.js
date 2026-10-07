@@ -74,6 +74,7 @@
         loadVehicles();
         loadOptions();
         buildTimeSelects();
+        buildTransportTimeSelects();
         bindNavigation();
     }
 
@@ -498,6 +499,26 @@
         return valid;
     }
 
+    function buildTransportTimeSelects() {
+        var selects = [
+            $('[name="arrival_hour"]'), $('[name="arrival_min"]'),
+            $('[name="departure_hour"]'), $('[name="departure_min"]')
+        ];
+        selects.forEach(function (sel) {
+            if (!sel) return;
+            var isMin = sel.name.indexOf('min') !== -1;
+            if (isMin) {
+                for (var m = 0; m < 60; m += 5) {
+                    sel.innerHTML += '<option value="' + String(m).padStart(2, '0') + '">' + String(m).padStart(2, '0') + '</option>';
+                }
+            } else {
+                for (var h = 0; h <= 23; h++) {
+                    sel.innerHTML += '<option value="' + String(h).padStart(2, '0') + '">' + String(h).padStart(2, '0') + '</option>';
+                }
+            }
+        });
+    }
+
     function collectCustomer() {
         var form = $('#rc-customer-form');
         state.customer = {
@@ -509,6 +530,18 @@
             customer_address: form.querySelector('[name="customer_address"]').value.trim(),
             note: form.querySelector('[name="note"]').value.trim()
         };
+        // Transport info
+        var gv = function (n) { var el = form.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
+        state.customer.arrival_airline = gv('arrival_airline');
+        state.customer.arrival_flight = gv('arrival_flight');
+        state.customer.arrival_date = gv('arrival_date');
+        state.customer.arrival_hour = gv('arrival_hour');
+        state.customer.arrival_min = gv('arrival_min');
+        state.customer.departure_airline = gv('departure_airline');
+        state.customer.departure_flight = gv('departure_flight');
+        state.customer.departure_date = gv('departure_date');
+        state.customer.departure_hour = gv('departure_hour');
+        state.customer.departure_min = gv('departure_min');
     }
 
     /* ── Price Calculation ────────────────────────────── */
@@ -558,6 +591,27 @@
             '<div class="rc-confirm-row"><span class="rc-confirm-label">郵便番号</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_zip) + '</span></div>' +
             '<div class="rc-confirm-row"><span class="rc-confirm-label">住所</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_address) + '</span></div>' +
             '</div>';
+
+        // Transport info (if any filled)
+        var c = state.customer;
+        var hasArrival = c.arrival_airline || c.arrival_flight || c.arrival_date;
+        var hasDeparture = c.departure_airline || c.departure_flight || c.departure_date;
+        if (hasArrival || hasDeparture) {
+            html += '<div class="rc-confirm-section"><h3>利用交通機関</h3>';
+            if (hasArrival) {
+                var arrTime = (c.arrival_hour && c.arrival_min) ? c.arrival_hour + ':' + c.arrival_min : '';
+                html += '<div class="rc-confirm-row"><span class="rc-confirm-label">到着便</span><span class="rc-confirm-value">' +
+                    escHTML(c.arrival_airline) + ' ' + escHTML(c.arrival_flight) +
+                    (c.arrival_date ? ' / ' + c.arrival_date : '') + (arrTime ? ' ' + arrTime : '') + '</span></div>';
+            }
+            if (hasDeparture) {
+                var depTime = (c.departure_hour && c.departure_min) ? c.departure_hour + ':' + c.departure_min : '';
+                html += '<div class="rc-confirm-row"><span class="rc-confirm-label">出発便</span><span class="rc-confirm-value">' +
+                    escHTML(c.departure_airline) + ' ' + escHTML(c.departure_flight) +
+                    (c.departure_date ? ' / ' + c.departure_date : '') + (depTime ? ' ' + depTime : '') + '</span></div>';
+            }
+            html += '</div>';
+        }
 
         html += '<div class="rc-confirm-total">' + i18n.totalAmount + ': ' + formatPrice(state.totalAmount) + '</div>';
 
