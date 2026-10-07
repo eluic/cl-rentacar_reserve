@@ -122,6 +122,42 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <textarea name="note" class="rc-textarea" rows="3" placeholder="ご要望がございましたらご記入ください"></textarea>
                 </div>
             </div>
+            <div class="rc-transport-section">
+                <h3 class="rc-transport-title">利用交通機関</h3>
+                <div class="rc-transport-table-wrap">
+                    <table class="rc-transport-table">
+                        <thead><tr><th></th><th>航空会社</th><th>便 名</th><th>予定日時</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td class="rc-transport-label">到着便</td>
+                                <td><input type="text" name="arrival_airline" class="rc-input rc-input-sm" placeholder=""></td>
+                                <td><input type="text" name="arrival_flight" class="rc-input rc-input-sm" placeholder=""></td>
+                                <td class="rc-transport-datetime">
+                                    <input type="date" name="arrival_date" class="rc-input rc-input-sm">
+                                    <span class="rc-transport-time-group">
+                                        <select name="arrival_hour" class="rc-select rc-select-sm"><option value="">--</option></select>
+                                        <span class="rc-transport-colon">:</span>
+                                        <select name="arrival_min" class="rc-select rc-select-sm"><option value="">--</option></select>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="rc-transport-label">出発便</td>
+                                <td><input type="text" name="departure_airline" class="rc-input rc-input-sm" placeholder=""></td>
+                                <td><input type="text" name="departure_flight" class="rc-input rc-input-sm" placeholder=""></td>
+                                <td class="rc-transport-datetime">
+                                    <input type="date" name="departure_date" class="rc-input rc-input-sm">
+                                    <span class="rc-transport-time-group">
+                                        <select name="departure_hour" class="rc-select rc-select-sm"><option value="">--</option></select>
+                                        <span class="rc-transport-colon">:</span>
+                                        <select name="departure_min" class="rc-select rc-select-sm"><option value="">--</option></select>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </form>
         <div class="rc-step-nav">
             <button type="button" class="rc-btn rc-btn-secondary rc-prev-btn">戻る</button>
