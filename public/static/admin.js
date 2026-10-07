@@ -689,10 +689,23 @@
         }
         refresh();
         $('#rca-add-option').on('click', function () {
-            var name = prompt('オプション名:'); if (!name) return;
-            var amount = prompt('金額（円）:', '1000');
-            var unit = prompt('単位 (per_reservation/per_day):', 'per_reservation');
-            api('POST', '/admin/options', { name: name, amount: parseInt(amount), unit: unit }).done(function () { toast('追加しました'); refresh(); });
+            $('.rca-modal-overlay').remove();
+            var m = '<div class="rca-modal-overlay active" id="rca-option-modal"><div class="rca-modal" style="max-width:500px">' +
+                '<h3 class="rca-modal-title">オプション追加</h3>' +
+                '<div class="rca-form-group"><label class="rca-label">オプション名</label><input class="rca-input" id="rca-opt-name" placeholder="例: チャイルドシート"></div>' +
+                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">金額（円）</label><input type="number" class="rca-input" id="rca-opt-amount" value="1000" min="0"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">単位</label><select class="rca-select" id="rca-opt-unit"><option value="per_reservation">予約毎</option><option value="per_day">日額</option></select></div></div>' +
+                '<div class="rca-modal-footer"><button class="rca-btn rca-btn-secondary" id="rca-opt-cancel">閉じる</button><button class="rca-btn rca-btn-primary" id="rca-opt-save">追加</button></div>' +
+                '</div></div>';
+            $('body').append(m);
+            $('#rca-opt-cancel').on('click', function () { $('#rca-option-modal').remove(); });
+            $('#rca-opt-save').on('click', function () {
+                var name = $('#rca-opt-name').val().trim();
+                if (!name) { toast('オプション名を入力してください', true); return; }
+                var data = { name: name, amount: parseInt($('#rca-opt-amount').val()), unit: $('#rca-opt-unit').val() };
+                api('POST', '/admin/options', data).done(function () { toast('追加しました'); $('#rca-option-modal').remove(); refresh(); })
+                    .fail(function () { toast('追加に失敗しました', true); });
+            });
         });
         $(document).on('click', '.rca-del-option', function () {
             if (!confirm('削除しますか？')) return;
@@ -716,9 +729,22 @@
         }
         refresh();
         $('#rca-add-holiday').on('click', function () {
-            var date = prompt('日付 (YYYY-MM-DD):'); if (!date) return;
-            var label = prompt('ラベル:', '休業日');
-            api('POST', '/admin/holidays', { date: date, label: label, vehicle_id: 0 }).done(function () { toast('追加しました'); refresh(); });
+            $('.rca-modal-overlay').remove();
+            var m = '<div class="rca-modal-overlay active" id="rca-holiday-modal"><div class="rca-modal" style="max-width:500px">' +
+                '<h3 class="rca-modal-title">休業日を追加</h3>' +
+                '<div class="rca-form-row"><div class="rca-form-group"><label class="rca-label">日付</label><input type="date" class="rca-input" id="rca-hol-date"></div>' +
+                '<div class="rca-form-group"><label class="rca-label">ラベル</label><input class="rca-input" id="rca-hol-label" value="休業日" placeholder="例: 休業日、年末休業"></div></div>' +
+                '<div class="rca-modal-footer"><button class="rca-btn rca-btn-secondary" id="rca-hol-cancel">閉じる</button><button class="rca-btn rca-btn-primary" id="rca-hol-save">追加</button></div>' +
+                '</div></div>';
+            $('body').append(m);
+            $('#rca-hol-cancel').on('click', function () { $('#rca-holiday-modal').remove(); });
+            $('#rca-hol-save').on('click', function () {
+                var date = $('#rca-hol-date').val();
+                if (!date) { toast('日付を選択してください', true); return; }
+                var label = $('#rca-hol-label').val().trim() || '休業日';
+                api('POST', '/admin/holidays', { date: date, label: label, vehicle_id: 0 }).done(function () { toast('追加しました'); $('#rca-holiday-modal').remove(); refresh(); })
+                    .fail(function () { toast('追加に失敗しました', true); });
+            });
         });
         $(document).on('click', '.rca-del-holiday', function () {
             if (!confirm('削除しますか？')) return;
