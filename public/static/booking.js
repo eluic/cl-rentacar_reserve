@@ -324,20 +324,13 @@
                 // Range highlight
                 if (state.pickupDate && state.returnDate && dateStr > state.pickupDate && dateStr < state.returnDate) cellCls += ' rc-cal-range';
 
-                // Status symbol
+                // Status: show remaining count as number
                 var statusHtml = '';
-                if (isPast || status === 'past') {
+                if (isPast || status === 'past' || status === 'holiday' || status === 'blocked') {
                     statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
-                } else if (status === 'holiday' || status === 'blocked') {
-                    statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
-                } else if (status === 'full') {
-                    statusHtml = '<div class="rc-cal-status rc-cal-status-full">×</div>';
-                } else if (status === 'few') {
-                    statusHtml = '<div class="rc-cal-status rc-cal-status-avail">○</div><span class="rc-cal-remaining">残' + remaining + '</span>';
-                } else if (status === 'available') {
-                    statusHtml = '<div class="rc-cal-status rc-cal-status-avail">○</div>';
                 } else {
-                    statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
+                    var cls = remaining <= 0 ? 'rc-cal-status-zero' : (remaining <= 1 ? 'rc-cal-status-few' : 'rc-cal-status-avail');
+                    statusHtml = '<div class="rc-cal-status ' + cls + '">' + remaining + '</div>';
                 }
 
                 html += '<div class="' + cellCls + '" data-date="' + dateStr + '">' +
@@ -355,9 +348,9 @@
 
             // Legend
             html += '<div class="rc-cal-legend">' +
-                '<span>○ 空きあり</span>' +
-                '<span style="color:#e65100">残○ 残りわずか</span>' +
-                '<span>× 満車</span>' +
+                '<span>数字＝残り台数</span>' +
+                '<span style="color:#e65100">1 残りわずか</span>' +
+                '<span style="color:#c62828">0 満車</span>' +
                 '<span>ー 受付外</span></div>';
 
             container.innerHTML = html;

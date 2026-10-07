@@ -128,11 +128,10 @@
 .rc-cal-cell.rc-cal-sat .rc-cal-day { color: #1a4ed8; }
 .rc-cal-cell.rc-cal-sun .rc-cal-day { color: #dc2626; }
 .rc-cal-status { margin-top: 4px; font-size: 16px; line-height: 1; }
-.rc-cal-status-avail { color: #555; } /* ○ */
-.rc-cal-status-few { color: #e65100; font-size: 13px; font-weight: 700; } /* △ remaining */
-.rc-cal-status-full { color: #999; } /* × */
-.rc-cal-status-closed { color: #999; } /* ー */
-.rc-cal-remaining { display: block; font-size: 10px; color: #e65100; font-weight: 600; margin-top: 1px; }
+.rc-cal-status-avail { color: #2e7d32; font-size: 16px; font-weight: 700; }
+.rc-cal-status-few { color: #e65100; font-size: 16px; font-weight: 700; }
+.rc-cal-status-zero { color: #c62828; font-size: 16px; font-weight: 700; }
+.rc-cal-status-closed { color: #bbb; } /* ー */
 .rc-cal-legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid #eee; font-size: 12px; color: #666; background: #fafafa; }
 .rc-cal-legend span { display: flex; align-items: center; gap: 4px; }
 
