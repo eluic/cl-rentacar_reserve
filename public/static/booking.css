@@ -207,6 +207,11 @@
 .rc-form-group-full { flex: 1; width: 100%; }
 .rc-error-msg { font-size: 12px; color: var(--rc-danger); margin-top: 4px; display: block; min-height: 16px; }
 
+/* ── Passenger Count ────────────────────────────────── */
+.rc-passenger-row { display: flex; align-items: center; gap: 8px; }
+.rc-passenger-label { font-size: 14px; font-weight: 600; color: var(--rc-text); white-space: nowrap; }
+.rc-select-num { width: 72px; }
+
 /* ── Transport Section ──────────────────────────────── */
 .rc-transport-section { margin-top: 8px; margin-bottom: 16px; background: var(--rc-white); border-radius: var(--rc-radius); box-shadow: var(--rc-shadow); padding: 20px; }
 .rc-transport-title { font-size: 16px; font-weight: 700; color: var(--rc-text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 3px solid var(--rc-primary); }

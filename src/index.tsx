@@ -463,6 +463,17 @@ app.get('/booking', (c) => {
             <div class="rc-form-group rc-form-group-lg"><label class="rc-label rc-required">住所</label><input type="text" name="customer_address" class="rc-input" placeholder="例: 沖縄県那覇市..." required><span class="rc-error-msg"></span></div>
           </div>
           <div class="rc-form-row">
+            <div class="rc-form-group">
+              <label class="rc-label rc-required">ご利用人数</label>
+              <div class="rc-passenger-row">
+                <label class="rc-passenger-label">大人</label>
+                <select name="adults" class="rc-select rc-select-num"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
+                <label class="rc-passenger-label">子供</label>
+                <select name="children" class="rc-select rc-select-num"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="rc-form-row">
             <div class="rc-form-group rc-form-group-full"><label class="rc-label">備考</label><textarea name="note" class="rc-textarea" rows="3" placeholder="ご要望がございましたらご記入ください"></textarea></div>
           </div>
           <div class="rc-transport-section">

@@ -528,7 +528,9 @@
             customer_tel: form.querySelector('[name="customer_tel"]').value.trim(),
             customer_zip: form.querySelector('[name="customer_zip"]').value.trim(),
             customer_address: form.querySelector('[name="customer_address"]').value.trim(),
-            note: form.querySelector('[name="note"]').value.trim()
+            note: form.querySelector('[name="note"]').value.trim(),
+            adults: form.querySelector('[name="adults"]').value,
+            children: form.querySelector('[name="children"]').value
         };
         // Transport info
         var gv = function (n) { var el = form.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
@@ -590,6 +592,7 @@
             '<div class="rc-confirm-row"><span class="rc-confirm-label">電話番号</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_tel) + '</span></div>' +
             '<div class="rc-confirm-row"><span class="rc-confirm-label">郵便番号</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_zip) + '</span></div>' +
             '<div class="rc-confirm-row"><span class="rc-confirm-label">住所</span><span class="rc-confirm-value">' + escHTML(state.customer.customer_address) + '</span></div>' +
+            '<div class="rc-confirm-row"><span class="rc-confirm-label">ご利用人数</span><span class="rc-confirm-value">大人 ' + state.customer.adults + '名 / 子供 ' + state.customer.children + '名</span></div>' +
             '</div>';
 
         // Transport info (if any filled)
