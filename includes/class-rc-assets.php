@@ -103,42 +103,18 @@ class RC_Assets {
         $ver = RC_PLUGIN_VERSION;
         $url = RC_PLUGIN_URL;
 
-        // Flatpickr CSS
-        wp_enqueue_style(
-            'flatpickr',
-            'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css',
-            array(),
-            '4.6.13'
-        );
-        // Flatpickr JS
-        wp_enqueue_script(
-            'flatpickr',
-            'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js',
-            array(),
-            '4.6.13',
-            true
-        );
-        // Flatpickr Japanese locale
-        wp_enqueue_script(
-            'flatpickr-ja',
-            'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ja.js',
-            array( 'flatpickr' ),
-            '4.6.13',
-            true
-        );
-
-        // Booking CSS
+        // Booking CSS (custom calendar — flatpickr removed in v1.1.3)
         wp_enqueue_style(
             'rc-booking',
             $url . 'public/assets/booking.css',
-            array( 'flatpickr' ),
+            array(),
             $ver
         );
         // Booking JS
         wp_enqueue_script(
             'rc-booking',
             $url . 'public/assets/booking.js',
-            array( 'flatpickr', 'flatpickr-ja' ),
+            array(),
             $ver,
             true
         );
