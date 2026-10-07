@@ -65,27 +65,44 @@
     border-bottom: 3px solid var(--rc-primary);
 }
 
-/* ── Vehicle Grid ───────────────────────────────────── */
+/* ── Vehicle List ───────────────────────────────────── */
 .rc-vehicle-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    display: flex; flex-direction: column; gap: 0;
+    background: var(--rc-white); border-radius: var(--rc-radius);
+    box-shadow: var(--rc-shadow); overflow: hidden;
 }
 .rc-vehicle-card {
-    background: var(--rc-white); border-radius: var(--rc-radius);
-    box-shadow: var(--rc-shadow); overflow: hidden; cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent;
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px; cursor: pointer;
+    transition: background 0.2s; border-bottom: 1px solid #eee;
+    border-left: 3px solid transparent;
 }
-.rc-vehicle-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
-.rc-vehicle-card.selected { border-color: var(--rc-primary); box-shadow: 0 0 0 3px var(--rc-primary-light); }
-.rc-vehicle-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
-.rc-vehicle-img-placeholder { width: 100%; height: 160px; background: linear-gradient(135deg, var(--rc-primary-light), #e0f7fa); display: flex; align-items: center; justify-content: center; color: var(--rc-primary); font-size: 40px; }
-.rc-vehicle-info { padding: 16px; }
-.rc-vehicle-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-.rc-vehicle-meta { display: flex; gap: 12px; margin-bottom: 8px; font-size: 13px; color: var(--rc-text-light); }
-.rc-vehicle-meta-item { display: flex; align-items: center; gap: 4px; }
-.rc-vehicle-meta-icon { color: var(--rc-primary); font-size: 14px; }
-.rc-vehicle-price { font-size: 20px; font-weight: 700; color: var(--rc-primary); }
-.rc-vehicle-price-unit { font-size: 12px; color: var(--rc-text-muted); font-weight: 400; }
+.rc-vehicle-card:last-child { border-bottom: none; }
+.rc-vehicle-card:hover { background: #f5fafa; }
+.rc-vehicle-card.selected { background: rgba(0,188,212,0.05); border-left-color: var(--rc-primary); }
+.rc-vehicle-img {
+    width: 160px; height: 110px; object-fit: cover; background: #eee;
+    border-radius: 6px; flex-shrink: 0;
+}
+.rc-vehicle-img-placeholder {
+    width: 160px; height: 110px; background: linear-gradient(135deg, var(--rc-primary-light), #e0f7fa);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--rc-primary); font-size: 32px; border-radius: 6px; flex-shrink: 0;
+}
+.rc-vehicle-info { flex: 1; min-width: 0; }
+.rc-vehicle-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.rc-vehicle-meta { display: none; }
+.rc-vehicle-price { font-size: 20px; font-weight: 700; color: var(--rc-danger); }
+.rc-vehicle-price-unit { font-size: 13px; color: var(--rc-text-muted); font-weight: 400; }
+.rc-vehicle-action { flex-shrink: 0; }
+.rc-vehicle-book-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 28px; border: none; border-radius: 6px;
+    background: var(--rc-primary); color: var(--rc-white);
+    font-size: 14px; font-weight: 700; font-family: var(--rc-font);
+    cursor: pointer; transition: background 0.2s;
+}
+.rc-vehicle-book-btn:hover { background: var(--rc-primary-dark); }
 
 /* ── Date/Time Selection ────────────────────────────── */
 .rc-selected-vehicle-summary {
@@ -240,7 +257,12 @@
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 640px) {
     .rc-booking { padding: 12px; }
-    .rc-vehicle-grid { grid-template-columns: 1fr; }
+    .rc-vehicle-card { flex-wrap: wrap; gap: 12px; padding: 14px; }
+    .rc-vehicle-img, .rc-vehicle-img-placeholder { width: 120px; height: 85px; }
+    .rc-vehicle-name { font-size: 14px; }
+    .rc-vehicle-price { font-size: 17px; }
+    .rc-vehicle-action { width: 100%; }
+    .rc-vehicle-book-btn { width: 100%; text-align: center; }
     .rc-datetime-row { flex-direction: column; gap: 12px; }
     .rc-form-row { flex-direction: column; gap: 12px; }
     .rc-form-group-sm, .rc-form-group-lg { flex: 1; }
