@@ -309,7 +309,8 @@
                 var isToday = dateStr === todayStr;
                 var dayInfo = days ? days[dateStr] : null;
                 var status = dayInfo ? dayInfo.status : (isPast ? 'past' : 'unknown');
-                var remaining = dayInfo ? dayInfo.remaining : 0;
+                var remaining = dayInfo ? (dayInfo.remaining !== undefined ? dayInfo.remaining : dayInfo.available) : 0;
+                if (remaining === undefined || remaining === null) remaining = 0;
 
                 var cellCls = 'rc-cal-cell';
                 if (isPast) cellCls += ' rc-cal-past';
