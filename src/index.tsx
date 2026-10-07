@@ -477,7 +477,8 @@ app.get('/booking', (c) => {
             <div class="rc-form-group rc-form-group-full"><label class="rc-label">備考</label><textarea name="note" class="rc-textarea" rows="3" placeholder="ご要望がございましたらご記入ください"></textarea></div>
           </div>
           <div class="rc-transport-section">
-            <h3 class="rc-transport-title">利用交通機関</h3>
+            <h3 class="rc-transport-title">利用交通機関 <span style="color:#e53935;font-size:13px;font-weight:400">※必須</span></h3>
+            <span class="rc-error-msg" id="rc-transport-error"></span>
             <div class="rc-transport-table-wrap">
               <table class="rc-transport-table">
                 <thead><tr><th></th><th>航空会社</th><th>便 名</th><th>予定日時</th></tr></thead>
