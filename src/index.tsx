@@ -275,7 +275,6 @@ const HEAD = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="/static/booking.css">
 <link rel="stylesheet" href="/static/cancel.css">
 `
@@ -424,21 +423,16 @@ app.get('/booking', (c) => {
       <div class="rc-step" data-step="2" style="display:none">
         <h2 class="rc-step-title">貸出・返却日時を選択</h2>
         <div class="rc-selected-vehicle-summary" id="rc-selected-vehicle-summary"></div>
+        <div id="rc-availability-calendar" class="rc-avail-calendar"></div>
         <div class="rc-datetime-section">
           <div class="rc-datetime-row">
-            <div class="rc-datetime-group"><label class="rc-label">貸出日</label><input type="text" id="rc-pickup-date" class="rc-input" placeholder="日付を選択" readonly></div>
+            <div class="rc-datetime-group"><label class="rc-label">貸出日</label><input type="text" id="rc-pickup-date" class="rc-input" placeholder="カレンダーから選択" readonly></div>
             <div class="rc-datetime-group"><label class="rc-label">貸出時間</label><select id="rc-pickup-time" class="rc-select"></select></div>
           </div>
           <div class="rc-datetime-row">
-            <div class="rc-datetime-group"><label class="rc-label">返却日</label><input type="text" id="rc-return-date" class="rc-input" placeholder="日付を選択" readonly></div>
+            <div class="rc-datetime-group"><label class="rc-label">返却日</label><input type="text" id="rc-return-date" class="rc-input" placeholder="カレンダーから選択" readonly></div>
             <div class="rc-datetime-group"><label class="rc-label">返却時間</label><select id="rc-return-time" class="rc-select"></select></div>
           </div>
-        </div>
-        <div id="rc-calendar-legend" class="rc-calendar-legend">
-          <span class="rc-legend-item"><span class="rc-legend-dot available"></span>空きあり</span>
-          <span class="rc-legend-item"><span class="rc-legend-dot few"></span>残りわずか</span>
-          <span class="rc-legend-item"><span class="rc-legend-dot full"></span>空きなし</span>
-          <span class="rc-legend-item"><span class="rc-legend-dot holiday"></span>休業日</span>
         </div>
         <div class="rc-step-nav">
           <button type="button" class="rc-btn rc-btn-secondary rc-prev-btn">戻る</button>
@@ -506,8 +500,6 @@ app.get('/booking', (c) => {
   </main>
   ${FOOTER}
 
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
   <script>
     // Provide rcBookingData (replaces wp_localize_script)
     var rcBookingData = {

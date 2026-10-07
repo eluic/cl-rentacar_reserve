@@ -209,118 +209,196 @@
         returnSel.value = '17:00';
     }
 
-    var flatpickrInstances = {};
-    var flatpickrInitialized = false;
+    /* ── Custom Availability Calendar ────────────────── */
+    var calendarInitialized = false;
+    var calendarYear, calendarMonth; // 0-indexed month
+    var selectingField = 'pickup'; // 'pickup' or 'return'
+
     function initFlatpickr() {
-        if (flatpickrInitialized) return;
+        // Now uses custom calendar instead of flatpickr
+        if (calendarInitialized) return;
         if (!state.selectedVehicle) return;
-        if (typeof flatpickr === 'undefined') return;
-        flatpickrInitialized = true;
+        calendarInitialized = true;
 
         var sv = state.selectedVehicle;
         $('#rc-selected-vehicle-summary').innerHTML =
             '<strong>' + escHTML(sv.name) + '</strong> — ' + sv.seats + i18n.seats + ' / ' + escHTML(sv.transmission) + ' / ' + formatPrice(sv.base_price) + i18n.perDay;
 
-        // Load availability for current month
         var now = new Date();
-        var month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        calendarYear = now.getFullYear();
+        calendarMonth = now.getMonth();
 
-        function loadAvail(m) {
-            var key = sv.id + '_' + m;
-            if (state.availabilityCache[key]) return Promise.resolve(state.availabilityCache[key]);
-            return ajax('GET', '/availability', { vehicle_id: sv.id, month: m }).then(function (res) {
-                state.availabilityCache[key] = res.days;
-                return res.days;
-            });
-        }
-
-        var pickupFP = flatpickr('#rc-pickup-date', {
-            locale: 'ja',
-            dateFormat: 'Y-m-d',
-            minDate: 'today',
-            disableMobile: true,
-            disable: [isDateDisabled],
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                colorDay(dayElem, sv.id);
-            },
-            onMonthChange: function (selectedDates, dateStr, instance) {
-                var y = instance.currentYear;
-                var m2 = String(instance.currentMonth + 1).padStart(2, '0');
-                loadAvail(y + '-' + m2).then(function () { instance.redraw(); });
-            },
-            onChange: function (sel) {
-                if (sel[0]) {
-                    state.pickupDate = flatpickr.formatDate(sel[0], 'Y-m-d');
-                    checkStep2Ready();
-                }
-            }
-        });
-
-        var returnFP = flatpickr('#rc-return-date', {
-            locale: 'ja',
-            dateFormat: 'Y-m-d',
-            minDate: 'today',
-            disableMobile: true,
-            disable: [isDateDisabled],
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                colorDay(dayElem, sv.id);
-            },
-            onMonthChange: function (selectedDates, dateStr, instance) {
-                var y = instance.currentYear;
-                var m2 = String(instance.currentMonth + 1).padStart(2, '0');
-                loadAvail(y + '-' + m2).then(function () { instance.redraw(); });
-            },
-            onChange: function (sel) {
-                if (sel[0]) {
-                    state.returnDate = flatpickr.formatDate(sel[0], 'Y-m-d');
-                    checkStep2Ready();
-                }
-            }
-        });
-
-        flatpickrInstances.pickup = pickupFP;
-        flatpickrInstances.returnFP = returnFP;
-
-        // Preload current month
-        loadAvail(month).then(function () {
-            pickupFP.redraw();
-            returnFP.redraw();
-        });
+        // Make date inputs clickable to switch selection target
+        var pickupInput = $('#rc-pickup-date');
+        var returnInput = $('#rc-return-date');
+        if (pickupInput) pickupInput.addEventListener('click', function () { selectingField = 'pickup'; highlightActiveInput(); });
+        if (returnInput) returnInput.addEventListener('click', function () { selectingField = 'return'; highlightActiveInput(); });
 
         // Time change handlers
         $('#rc-pickup-time').addEventListener('change', function () { state.pickupTime = this.value; checkStep2Ready(); });
         $('#rc-return-time').addEventListener('change', function () { state.returnTime = this.value; checkStep2Ready(); });
         state.pickupTime = $('#rc-pickup-time').value;
         state.returnTime = $('#rc-return-time').value;
+
+        renderCalendar();
     }
 
-    function colorDay(dayElem, vehicleId) {
-        var dateStr = flatpickr.formatDate(dayElem.dateObj, 'Y-m-d');
-        var monthKey = dateStr.substring(0, 7);
-        var cacheKey = vehicleId + '_' + monthKey;
-        var days = state.availabilityCache[cacheKey];
-        if (!days || !days[dateStr]) return;
-
-        var s = days[dateStr].status;
-        dayElem.classList.add('rc-day-' + s);
-
-        // Disable dates that are full, holiday, or blocked
-        if (s === 'full' || s === 'holiday' || s === 'blocked') {
-            dayElem.classList.add('flatpickr-disabled');
-            dayElem.setAttribute('aria-disabled', 'true');
-        }
+    function highlightActiveInput() {
+        var p = $('#rc-pickup-date');
+        var r = $('#rc-return-date');
+        if (p) p.style.borderColor = (selectingField === 'pickup') ? 'var(--rc-primary)' : '';
+        if (r) r.style.borderColor = (selectingField === 'return') ? 'var(--rc-primary)' : '';
     }
 
-    /** Check if a date should be disabled based on availability cache */
-    function isDateDisabled(dateObj) {
-        if (!state.selectedVehicle) return false;
-        var dateStr = flatpickr.formatDate(dateObj, 'Y-m-d');
-        var monthKey = dateStr.substring(0, 7);
-        var cacheKey = state.selectedVehicle.id + '_' + monthKey;
-        var days = state.availabilityCache[cacheKey];
-        if (!days || !days[dateStr]) return false;
-        var s = days[dateStr].status;
-        return s === 'full' || s === 'holiday' || s === 'blocked';
+    function loadAvail(m) {
+        var sv = state.selectedVehicle;
+        if (!sv) return Promise.resolve({});
+        var key = sv.id + '_' + m;
+        if (state.availabilityCache[key]) return Promise.resolve(state.availabilityCache[key]);
+        return ajax('GET', '/availability', { vehicle_id: sv.id, month: m }).then(function (res) {
+            state.availabilityCache[key] = res.days;
+            return res.days;
+        });
+    }
+
+    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function renderCalendar() {
+        var container = $('#rc-availability-calendar');
+        if (!container) return;
+
+        var monthKey = calendarYear + '-' + pad2(calendarMonth + 1);
+        loadAvail(monthKey).then(function (days) {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var todayStr = today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
+
+            // Navigation
+            var canPrev = !(calendarYear === today.getFullYear() && calendarMonth === today.getMonth());
+            var html = '<div class="rc-cal-nav">' +
+                '<button type="button" class="rc-cal-nav-btn" id="rc-cal-prev"' + (canPrev ? '' : ' disabled') + '>＜</button>' +
+                '<span class="rc-cal-month">' + calendarYear + '年' + (calendarMonth + 1) + '月</span>' +
+                '<button type="button" class="rc-cal-nav-btn" id="rc-cal-next">＞</button></div>';
+
+            // Weekday headers (Mon-Sun)
+            var hdrs = ['月', '火', '水', '木', '金', '土', '日'];
+            html += '<div class="rc-cal-grid">';
+            hdrs.forEach(function (h, i) {
+                var cls = 'rc-cal-hdr';
+                if (i === 5) cls += ' rc-cal-sat';
+                if (i === 6) cls += ' rc-cal-sun';
+                html += '<div class="' + cls + '">' + h + '</div>';
+            });
+
+            // Days
+            var firstDay = new Date(calendarYear, calendarMonth, 1);
+            var startDow = (firstDay.getDay() + 6) % 7; // Mon=0
+            var daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            // Empty cells before first day
+            for (var e = 0; e < startDow; e++) {
+                html += '<div class="rc-cal-cell rc-cal-empty"></div>';
+            }
+
+            for (var d = 1; d <= daysInMonth; d++) {
+                var dateStr = calendarYear + '-' + pad2(calendarMonth + 1) + '-' + pad2(d);
+                var dateObj = new Date(calendarYear, calendarMonth, d);
+                var dow = (dateObj.getDay() + 6) % 7; // Mon=0
+                var isPast = dateObj < today;
+                var isToday = dateStr === todayStr;
+                var dayInfo = days ? days[dateStr] : null;
+                var status = dayInfo ? dayInfo.status : (isPast ? 'past' : 'unknown');
+                var remaining = dayInfo ? dayInfo.remaining : 0;
+
+                var cellCls = 'rc-cal-cell';
+                if (isPast) cellCls += ' rc-cal-past';
+                if (isToday) cellCls += ' rc-cal-today';
+                if (dow === 5) cellCls += ' rc-cal-sat';
+                if (dow === 6) cellCls += ' rc-cal-sun';
+
+                var selectable = !isPast && status !== 'full' && status !== 'holiday' && status !== 'blocked';
+                if (selectable) cellCls += ' rc-cal-selectable';
+
+                // Highlight selected dates
+                if (dateStr === state.pickupDate || dateStr === state.returnDate) cellCls += ' rc-cal-selected';
+                // Range highlight
+                if (state.pickupDate && state.returnDate && dateStr > state.pickupDate && dateStr < state.returnDate) cellCls += ' rc-cal-range';
+
+                // Status symbol
+                var statusHtml = '';
+                if (isPast || status === 'past') {
+                    statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
+                } else if (status === 'holiday' || status === 'blocked') {
+                    statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
+                } else if (status === 'full') {
+                    statusHtml = '<div class="rc-cal-status rc-cal-status-full">×</div>';
+                } else if (status === 'few') {
+                    statusHtml = '<div class="rc-cal-status rc-cal-status-avail">○</div><span class="rc-cal-remaining">残' + remaining + '</span>';
+                } else if (status === 'available') {
+                    statusHtml = '<div class="rc-cal-status rc-cal-status-avail">○</div>';
+                } else {
+                    statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
+                }
+
+                html += '<div class="' + cellCls + '" data-date="' + dateStr + '">' +
+                    '<div class="rc-cal-day">' + d + '</div>' +
+                    statusHtml + '</div>';
+            }
+
+            // Trailing empty cells
+            var totalCells = startDow + daysInMonth;
+            var trailing = (7 - (totalCells % 7)) % 7;
+            for (var t = 0; t < trailing; t++) {
+                html += '<div class="rc-cal-cell rc-cal-empty"></div>';
+            }
+            html += '</div>';
+
+            // Legend
+            html += '<div class="rc-cal-legend">' +
+                '<span>○ 空きあり</span>' +
+                '<span style="color:#e65100">残○ 残りわずか</span>' +
+                '<span>× 満車</span>' +
+                '<span>ー 受付外</span></div>';
+
+            container.innerHTML = html;
+
+            // Bind nav buttons
+            var prevBtn = $('#rc-cal-prev');
+            var nextBtn = $('#rc-cal-next');
+            if (prevBtn) prevBtn.addEventListener('click', function () {
+                calendarMonth--;
+                if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+                renderCalendar();
+            });
+            if (nextBtn) nextBtn.addEventListener('click', function () {
+                calendarMonth++;
+                if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+                renderCalendar();
+            });
+
+            // Bind date clicks
+            $$('.rc-cal-selectable', container).forEach(function (cell) {
+                cell.addEventListener('click', function () {
+                    var dt = this.getAttribute('data-date');
+                    if (selectingField === 'pickup') {
+                        state.pickupDate = dt;
+                        $('#rc-pickup-date').value = dt;
+                        // Auto-switch to return if pickup selected
+                        selectingField = 'return';
+                        highlightActiveInput();
+                    } else {
+                        state.returnDate = dt;
+                        $('#rc-return-date').value = dt;
+                        selectingField = 'pickup';
+                        highlightActiveInput();
+                    }
+                    checkStep2Ready();
+                    renderCalendar(); // Re-render to update highlights
+                });
+            });
+
+            highlightActiveInput();
+        });
     }
 
     function checkStep2Ready() {
