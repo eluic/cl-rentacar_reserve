@@ -330,7 +330,7 @@
                     statusHtml = '<div class="rc-cal-status rc-cal-status-closed">ー</div>';
                 } else {
                     var cls = remaining <= 0 ? 'rc-cal-status-zero' : (remaining <= 1 ? 'rc-cal-status-few' : 'rc-cal-status-avail');
-                    statusHtml = '<div class="rc-cal-status ' + cls + '">' + remaining + '</div>';
+                    statusHtml = '<div class="rc-cal-status ' + cls + '">' + remaining + '台</div>';
                 }
 
                 html += '<div class="' + cellCls + '" data-date="' + dateStr + '">' +
