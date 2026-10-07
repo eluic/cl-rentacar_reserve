@@ -497,6 +497,42 @@
                 valid = false;
             }
         });
+
+        // Transport fields validation
+        var transportFields = [
+            { name: 'arrival_airline', label: '到着便 航空会社' },
+            { name: 'arrival_flight', label: '到着便 便名' },
+            { name: 'arrival_date', label: '到着便 予定日' },
+            { name: 'arrival_hour', label: '到着便 時' },
+            { name: 'arrival_min', label: '到着便 分' },
+            { name: 'departure_airline', label: '出発便 航空会社' },
+            { name: 'departure_flight', label: '出発便 便名' },
+            { name: 'departure_date', label: '出発便 予定日' },
+            { name: 'departure_hour', label: '出発便 時' },
+            { name: 'departure_min', label: '出発便 分' }
+        ];
+        transportFields.forEach(function (f) {
+            var input = form.querySelector('[name="' + f.name + '"]');
+            if (!input) return;
+            input.classList.remove('rc-invalid');
+            var val = input.value.trim();
+            if (!val) {
+                input.classList.add('rc-invalid');
+                valid = false;
+            }
+        });
+        if (!valid) {
+            // Check if transport section has errors to show message
+            var hasTransportError = transportFields.some(function (f) {
+                var el = form.querySelector('[name="' + f.name + '"]');
+                return el && el.classList.contains('rc-invalid');
+            });
+            var tErr = $('#rc-transport-error');
+            if (tErr) tErr.textContent = hasTransportError ? '利用交通機関の全項目を入力してください' : '';
+        } else {
+            var tErr2 = $('#rc-transport-error');
+            if (tErr2) tErr2.textContent = '';
+        }
         return valid;
     }
 
