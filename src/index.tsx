@@ -531,7 +531,12 @@ app.get('/booking', (c) => {
           <div id="rc-payment-methods" class="rc-payment-methods"></div>
         </div>
         <div class="rc-terms">
-          <label class="rc-checkbox-label"><input type="checkbox" id="rc-agree-terms"><span>利用規約に同意する</span></label>
+          <div class="rc-terms-links">
+            <a href="#" target="_blank" class="rc-terms-link">利用規約</a>
+            <span class="rc-terms-sep">|</span>
+            <a href="#" target="_blank" class="rc-terms-link">キャンセルポリシー</a>
+          </div>
+          <label class="rc-checkbox-label"><input type="checkbox" id="rc-agree-terms"><span>利用規約・キャンセルポリシーに同意する</span></label>
         </div>
         <div class="rc-step-nav">
           <button type="button" class="rc-btn rc-btn-secondary rc-prev-btn">戻る</button>
