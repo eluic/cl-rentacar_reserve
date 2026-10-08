@@ -75,6 +75,7 @@
         loadOptions();
         buildTimeSelects();
         buildTransportTimeSelects();
+        bindTransportType();
         bindNavigation();
     }
 
@@ -498,34 +499,24 @@
             }
         });
 
-        // Transport fields validation
-        var transportFields = [
-            { name: 'arrival_airline', label: '到着便 航空会社' },
-            { name: 'arrival_flight', label: '到着便 便名' },
-            { name: 'arrival_date', label: '到着便 予定日' },
-            { name: 'arrival_hour', label: '到着便 時' },
-            { name: 'arrival_min', label: '到着便 分' },
-            { name: 'departure_airline', label: '出発便 航空会社' },
-            { name: 'departure_flight', label: '出発便 便名' },
-            { name: 'departure_date', label: '出発便 予定日' },
-            { name: 'departure_hour', label: '出発便 時' },
-            { name: 'departure_min', label: '出発便 分' }
-        ];
-        transportFields.forEach(function (f) {
-            var input = form.querySelector('[name="' + f.name + '"]');
-            if (!input) return;
-            input.classList.remove('rc-invalid');
-            var val = input.value.trim();
-            if (!val) {
-                input.classList.add('rc-invalid');
-                valid = false;
-            }
-        });
-        if (!valid) {
-            // Check if transport section has errors to show message
-            var hasTransportError = transportFields.some(function (f) {
-                var el = form.querySelector('[name="' + f.name + '"]');
-                return el && el.classList.contains('rc-invalid');
+        // Transport fields validation (only if 送迎希望)
+        var transportType = form.querySelector('[name="transport_type"]:checked');
+        var isPickup = transportType && transportType.value === 'pickup';
+        if (isPickup) {
+            var transportFields = [
+                'arrival_airline', 'arrival_flight', 'arrival_date', 'arrival_hour', 'arrival_min',
+                'departure_airline', 'departure_flight', 'departure_date', 'departure_hour', 'departure_min'
+            ];
+            var hasTransportError = false;
+            transportFields.forEach(function (n) {
+                var input = form.querySelector('[name="' + n + '"]');
+                if (!input) return;
+                input.classList.remove('rc-invalid');
+                if (!input.value.trim()) {
+                    input.classList.add('rc-invalid');
+                    hasTransportError = true;
+                    valid = false;
+                }
             });
             var tErr = $('#rc-transport-error');
             if (tErr) tErr.textContent = hasTransportError ? '利用交通機関の全項目を入力してください' : '';
@@ -534,6 +525,25 @@
             if (tErr2) tErr2.textContent = '';
         }
         return valid;
+    }
+
+    function bindTransportType() {
+        var radios = $$('[name="transport_type"]');
+        radios.forEach(function (r) {
+            r.addEventListener('change', function () {
+                var fields = $('#rc-transport-fields');
+                if (!fields) return;
+                if (this.value === 'direct') {
+                    fields.style.display = 'none';
+                    // Clear errors
+                    var tErr = $('#rc-transport-error');
+                    if (tErr) tErr.textContent = '';
+                    $$('.rc-invalid', fields).forEach(function (el) { el.classList.remove('rc-invalid'); });
+                } else {
+                    fields.style.display = '';
+                }
+            });
+        });
     }
 
     function buildTransportTimeSelects() {
@@ -571,6 +581,8 @@
         };
         // Transport info
         var gv = function (n) { var el = form.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
+        var transportRadio = form.querySelector('[name="transport_type"]:checked');
+        state.customer.transport_type = transportRadio ? transportRadio.value : 'pickup';
         state.customer.arrival_airline = gv('arrival_airline');
         state.customer.arrival_flight = gv('arrival_flight');
         state.customer.arrival_date = gv('arrival_date');
@@ -632,26 +644,22 @@
             '<div class="rc-confirm-row"><span class="rc-confirm-label">ご利用人数</span><span class="rc-confirm-value">大人 ' + state.customer.adults + '名 / 子供 ' + state.customer.children + '名</span></div>' +
             '</div>';
 
-        // Transport info (if any filled)
+        // Transport info
         var c = state.customer;
-        var hasArrival = c.arrival_airline || c.arrival_flight || c.arrival_date;
-        var hasDeparture = c.departure_airline || c.departure_flight || c.departure_date;
-        if (hasArrival || hasDeparture) {
-            html += '<div class="rc-confirm-section"><h3>利用交通機関</h3>';
-            if (hasArrival) {
-                var arrTime = (c.arrival_hour && c.arrival_min) ? c.arrival_hour + ':' + c.arrival_min : '';
-                html += '<div class="rc-confirm-row"><span class="rc-confirm-label">到着便</span><span class="rc-confirm-value">' +
-                    escHTML(c.arrival_airline) + ' ' + escHTML(c.arrival_flight) +
-                    (c.arrival_date ? ' / ' + c.arrival_date : '') + (arrTime ? ' ' + arrTime : '') + '</span></div>';
-            }
-            if (hasDeparture) {
-                var depTime = (c.departure_hour && c.departure_min) ? c.departure_hour + ':' + c.departure_min : '';
-                html += '<div class="rc-confirm-row"><span class="rc-confirm-label">出発便</span><span class="rc-confirm-value">' +
-                    escHTML(c.departure_airline) + ' ' + escHTML(c.departure_flight) +
-                    (c.departure_date ? ' / ' + c.departure_date : '') + (depTime ? ' ' + depTime : '') + '</span></div>';
-            }
-            html += '</div>';
+        var typeLabel = c.transport_type === 'direct' ? '直接来店' : '送迎希望';
+        html += '<div class="rc-confirm-section"><h3>利用交通機関</h3>';
+        html += '<div class="rc-confirm-row"><span class="rc-confirm-label">来店方法</span><span class="rc-confirm-value">' + typeLabel + '</span></div>';
+        if (c.transport_type === 'pickup') {
+            var arrTime = (c.arrival_hour && c.arrival_min) ? c.arrival_hour + ':' + c.arrival_min : '';
+            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">到着便</span><span class="rc-confirm-value">' +
+                escHTML(c.arrival_airline) + ' ' + escHTML(c.arrival_flight) +
+                (c.arrival_date ? ' / ' + c.arrival_date : '') + (arrTime ? ' ' + arrTime : '') + '</span></div>';
+            var depTime = (c.departure_hour && c.departure_min) ? c.departure_hour + ':' + c.departure_min : '';
+            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">出発便</span><span class="rc-confirm-value">' +
+                escHTML(c.departure_airline) + ' ' + escHTML(c.departure_flight) +
+                (c.departure_date ? ' / ' + c.departure_date : '') + (depTime ? ' ' + depTime : '') + '</span></div>';
         }
+        html += '</div>';
 
         html += '<div class="rc-confirm-total">' + i18n.totalAmount + ': ' + formatPrice(state.totalAmount) + '</div>';
 
