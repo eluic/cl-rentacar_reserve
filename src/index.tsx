@@ -482,6 +482,13 @@ app.get('/booking', (c) => {
               <label class="rc-radio-label"><input type="radio" name="transport_type" value="pickup" checked><span>送迎希望</span></label>
               <label class="rc-radio-label"><input type="radio" name="transport_type" value="direct"><span>直接来店</span></label>
             </div>
+            <div class="rc-pickup-location" id="rc-pickup-location">
+              <label class="rc-label" style="margin-bottom:8px">送迎場所</label>
+              <div class="rc-transport-type">
+                <label class="rc-radio-label"><input type="radio" name="pickup_location" value="naha_airport" checked><span>那覇空港</span></label>
+                <label class="rc-radio-label"><input type="radio" name="pickup_location" value="akamine_station"><span>赤嶺駅</span></label>
+              </div>
+            </div>
             <span class="rc-error-msg" id="rc-transport-error"></span>
             <div class="rc-transport-table-wrap" id="rc-transport-fields">
               <table class="rc-transport-table">

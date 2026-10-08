@@ -532,15 +532,16 @@
         radios.forEach(function (r) {
             r.addEventListener('change', function () {
                 var fields = $('#rc-transport-fields');
-                if (!fields) return;
+                var locWrap = $('#rc-pickup-location');
                 if (this.value === 'direct') {
-                    fields.style.display = 'none';
-                    // Clear errors
+                    if (fields) fields.style.display = 'none';
+                    if (locWrap) locWrap.style.display = 'none';
                     var tErr = $('#rc-transport-error');
                     if (tErr) tErr.textContent = '';
-                    $$('.rc-invalid', fields).forEach(function (el) { el.classList.remove('rc-invalid'); });
+                    if (fields) $$('.rc-invalid', fields).forEach(function (el) { el.classList.remove('rc-invalid'); });
                 } else {
-                    fields.style.display = '';
+                    if (fields) fields.style.display = '';
+                    if (locWrap) locWrap.style.display = '';
                 }
             });
         });
@@ -583,6 +584,8 @@
         var gv = function (n) { var el = form.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
         var transportRadio = form.querySelector('[name="transport_type"]:checked');
         state.customer.transport_type = transportRadio ? transportRadio.value : 'pickup';
+        var locationRadio = form.querySelector('[name="pickup_location"]:checked');
+        state.customer.pickup_location = locationRadio ? locationRadio.value : '';
         state.customer.arrival_airline = gv('arrival_airline');
         state.customer.arrival_flight = gv('arrival_flight');
         state.customer.arrival_date = gv('arrival_date');
@@ -650,6 +653,8 @@
         html += '<div class="rc-confirm-section"><h3>利用交通機関</h3>';
         html += '<div class="rc-confirm-row"><span class="rc-confirm-label">来店方法</span><span class="rc-confirm-value">' + typeLabel + '</span></div>';
         if (c.transport_type === 'pickup') {
+            var locLabel = c.pickup_location === 'akamine_station' ? '赤嶺駅' : '那覇空港';
+            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">送迎場所</span><span class="rc-confirm-value">' + locLabel + '</span></div>';
             var arrTime = (c.arrival_hour && c.arrival_min) ? c.arrival_hour + ':' + c.arrival_min : '';
             html += '<div class="rc-confirm-row"><span class="rc-confirm-label">到着便</span><span class="rc-confirm-value">' +
                 escHTML(c.arrival_airline) + ' ' + escHTML(c.arrival_flight) +
