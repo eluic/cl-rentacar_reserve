@@ -473,9 +473,6 @@ app.get('/booking', (c) => {
               </div>
             </div>
           </div>
-          <div class="rc-form-row">
-            <div class="rc-form-group rc-form-group-full"><label class="rc-label">備考</label><textarea name="note" class="rc-textarea" rows="3" placeholder="ご要望がございましたらご記入ください"></textarea></div>
-          </div>
           <div class="rc-transport-section">
             <h3 class="rc-transport-title">利用交通機関 <span style="color:#e53935;font-size:13px;font-weight:400">※必須</span></h3>
             <div class="rc-transport-type">
@@ -491,44 +488,24 @@ app.get('/booking', (c) => {
             </div>
             <span class="rc-error-msg" id="rc-transport-error"></span>
             <div id="rc-transport-fields">
-              <div class="rc-flight-card">
-                <div class="rc-flight-card-header">✈ 到着便</div>
-                <div class="rc-flight-card-body">
-                  <div class="rc-form-row">
-                    <div class="rc-form-group"><label class="rc-label">航空会社</label><input type="text" name="arrival_airline" class="rc-input" placeholder="例: ANA"></div>
-                    <div class="rc-form-group"><label class="rc-label">便名</label><input type="text" name="arrival_flight" class="rc-input" placeholder="例: NH123"></div>
-                  </div>
-                  <div class="rc-form-row">
-                    <div class="rc-form-group"><label class="rc-label">予定日</label><input type="date" name="arrival_date" class="rc-input"></div>
-                    <div class="rc-form-group"><label class="rc-label">予定時刻</label>
-                      <div class="rc-time-inline">
-                        <select name="arrival_hour" class="rc-select"><option value="">--</option></select>
-                        <span class="rc-time-colon">:</span>
-                        <select name="arrival_min" class="rc-select"><option value="">--</option></select>
-                      </div>
-                    </div>
-                  </div>
+              <p class="rc-flight-note">※送迎をご希望の方は、フライト情報をご入力ください。</p>
+              <div class="rc-flight-info-card">
+                <div class="rc-flight-info-title">🌐 フライト情報</div>
+                <div class="rc-form-group">
+                  <label class="rc-label">到着便（お迎え時）</label>
+                  <input type="text" name="arrival_flight" class="rc-input" placeholder="例：JAL901">
+                </div>
+                <div class="rc-form-group" style="margin-top:12px">
+                  <label class="rc-label">出発便（お帰り時）</label>
+                  <input type="text" name="departure_flight" class="rc-input" placeholder="例：ANA472">
                 </div>
               </div>
-              <div class="rc-flight-card">
-                <div class="rc-flight-card-header">✈ 出発便</div>
-                <div class="rc-flight-card-body">
-                  <div class="rc-form-row">
-                    <div class="rc-form-group"><label class="rc-label">航空会社</label><input type="text" name="departure_airline" class="rc-input" placeholder="例: JAL"></div>
-                    <div class="rc-form-group"><label class="rc-label">便名</label><input type="text" name="departure_flight" class="rc-input" placeholder="例: JL456"></div>
-                  </div>
-                  <div class="rc-form-row">
-                    <div class="rc-form-group"><label class="rc-label">予定日</label><input type="date" name="departure_date" class="rc-input"></div>
-                    <div class="rc-form-group"><label class="rc-label">予定時刻</label>
-                      <div class="rc-time-inline">
-                        <select name="departure_hour" class="rc-select"><option value="">--</option></select>
-                        <span class="rc-time-colon">:</span>
-                        <select name="departure_min" class="rc-select"><option value="">--</option></select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
+          </div>
+          <div class="rc-form-row">
+            <div class="rc-form-group rc-form-group-full">
+              <label class="rc-label">備考・その他ご要望 <span style="color:#999;font-size:12px;font-weight:400">（任意）</span></label>
+              <textarea name="note" class="rc-textarea" rows="3" placeholder="チャイルドシートの年齢や、その他ご要望などがございましたらご記入ください。"></textarea>
             </div>
           </div>
         </form>

@@ -222,16 +222,10 @@
 .rc-transport-section { margin-top: 8px; margin-bottom: 16px; background: var(--rc-white); border-radius: var(--rc-radius); box-shadow: var(--rc-shadow); padding: 20px; }
 .rc-transport-title { font-size: 16px; font-weight: 700; color: var(--rc-text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 3px solid var(--rc-primary); }
 
-/* Flight cards */
-.rc-flight-card { border: 1px solid var(--rc-border); border-radius: var(--rc-radius); margin-bottom: 16px; overflow: hidden; }
-.rc-flight-card:last-child { margin-bottom: 0; }
-.rc-flight-card-header { background: #f5f9fa; padding: 10px 16px; font-size: 14px; font-weight: 700; color: var(--rc-primary-dark); border-bottom: 1px solid var(--rc-border); }
-.rc-flight-card-body { padding: 16px; }
-.rc-flight-card-body .rc-form-row { margin-bottom: 12px; }
-.rc-flight-card-body .rc-form-row:last-child { margin-bottom: 0; }
-.rc-time-inline { display: flex; align-items: center; gap: 6px; }
-.rc-time-inline .rc-select { width: 80px; }
-.rc-time-colon { font-weight: 700; font-size: 16px; color: var(--rc-text); }
+/* Flight info card */
+.rc-flight-note { font-size: 13px; color: var(--rc-text-muted); margin-bottom: 12px; }
+.rc-flight-info-card { background: #f0f7ff; border: 1px solid #d6e8f7; border-radius: 10px; padding: 20px; }
+.rc-flight-info-title { font-size: 15px; font-weight: 700; color: var(--rc-primary); margin-bottom: 16px; }
 
 /* ── Confirmation ───────────────────────────────────── */
 .rc-confirm-summary {

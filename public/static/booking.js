@@ -503,10 +503,7 @@
         var transportType = form.querySelector('[name="transport_type"]:checked');
         var isPickup = transportType && transportType.value === 'pickup';
         if (isPickup) {
-            var transportFields = [
-                'arrival_airline', 'arrival_flight', 'arrival_date', 'arrival_hour', 'arrival_min',
-                'departure_airline', 'departure_flight', 'departure_date', 'departure_hour', 'departure_min'
-            ];
+            var transportFields = ['arrival_flight', 'departure_flight'];
             var hasTransportError = false;
             transportFields.forEach(function (n) {
                 var input = form.querySelector('[name="' + n + '"]');
@@ -519,7 +516,7 @@
                 }
             });
             var tErr = $('#rc-transport-error');
-            if (tErr) tErr.textContent = hasTransportError ? '利用交通機関の全項目を入力してください' : '';
+            if (tErr) tErr.textContent = hasTransportError ? 'フライト情報を入力してください' : '';
         } else {
             var tErr2 = $('#rc-transport-error');
             if (tErr2) tErr2.textContent = '';
@@ -548,23 +545,7 @@
     }
 
     function buildTransportTimeSelects() {
-        var selects = [
-            $('[name="arrival_hour"]'), $('[name="arrival_min"]'),
-            $('[name="departure_hour"]'), $('[name="departure_min"]')
-        ];
-        selects.forEach(function (sel) {
-            if (!sel) return;
-            var isMin = sel.name.indexOf('min') !== -1;
-            if (isMin) {
-                for (var m = 0; m < 60; m += 5) {
-                    sel.innerHTML += '<option value="' + String(m).padStart(2, '0') + '">' + String(m).padStart(2, '0') + '</option>';
-                }
-            } else {
-                for (var h = 0; h <= 23; h++) {
-                    sel.innerHTML += '<option value="' + String(h).padStart(2, '0') + '">' + String(h).padStart(2, '0') + '</option>';
-                }
-            }
-        });
+        // No longer needed - flight info simplified to text fields
     }
 
     function collectCustomer() {
@@ -586,16 +567,8 @@
         state.customer.transport_type = transportRadio ? transportRadio.value : 'pickup';
         var locationRadio = form.querySelector('[name="pickup_location"]:checked');
         state.customer.pickup_location = locationRadio ? locationRadio.value : '';
-        state.customer.arrival_airline = gv('arrival_airline');
         state.customer.arrival_flight = gv('arrival_flight');
-        state.customer.arrival_date = gv('arrival_date');
-        state.customer.arrival_hour = gv('arrival_hour');
-        state.customer.arrival_min = gv('arrival_min');
-        state.customer.departure_airline = gv('departure_airline');
         state.customer.departure_flight = gv('departure_flight');
-        state.customer.departure_date = gv('departure_date');
-        state.customer.departure_hour = gv('departure_hour');
-        state.customer.departure_min = gv('departure_min');
     }
 
     /* ── Price Calculation ────────────────────────────── */
@@ -655,14 +628,8 @@
         if (c.transport_type === 'pickup') {
             var locLabel = c.pickup_location === 'akamine_station' ? '赤嶺駅' : '那覇空港';
             html += '<div class="rc-confirm-row"><span class="rc-confirm-label">送迎場所</span><span class="rc-confirm-value">' + locLabel + '</span></div>';
-            var arrTime = (c.arrival_hour && c.arrival_min) ? c.arrival_hour + ':' + c.arrival_min : '';
-            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">到着便</span><span class="rc-confirm-value">' +
-                escHTML(c.arrival_airline) + ' ' + escHTML(c.arrival_flight) +
-                (c.arrival_date ? ' / ' + c.arrival_date : '') + (arrTime ? ' ' + arrTime : '') + '</span></div>';
-            var depTime = (c.departure_hour && c.departure_min) ? c.departure_hour + ':' + c.departure_min : '';
-            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">出発便</span><span class="rc-confirm-value">' +
-                escHTML(c.departure_airline) + ' ' + escHTML(c.departure_flight) +
-                (c.departure_date ? ' / ' + c.departure_date : '') + (depTime ? ' ' + depTime : '') + '</span></div>';
+            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">到着便</span><span class="rc-confirm-value">' + escHTML(c.arrival_flight) + '</span></div>';
+            html += '<div class="rc-confirm-row"><span class="rc-confirm-label">出発便</span><span class="rc-confirm-value">' + escHTML(c.departure_flight) + '</span></div>';
         }
         html += '</div>';
 
