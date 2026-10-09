@@ -10,6 +10,7 @@ class RC_Rest_Admin_Holidays {
             array( 'methods' => 'POST', 'callback' => array( $this, 'store' ),   'permission_callback' => $ac ),
         ));
         register_rest_route( $ns, '/admin/holidays/(?P<id>\d+)', array(
+            array( 'methods' => 'PUT',    'callback' => array( $this, 'update_item' ), 'permission_callback' => $ac ),
             array( 'methods' => 'DELETE', 'callback' => array( $this, 'destroy' ), 'permission_callback' => $ac ),
         ));
     }
@@ -32,6 +33,16 @@ class RC_Rest_Admin_Holidays {
             'vehicle_id' => (int)($p['vehicle_id'] ?? 0),
         ));
         return rest_ensure_response( array( 'id' => $wpdb->insert_id ) );
+    }
+    public function update_item( $request ) {
+        global $wpdb;
+        $p = $request->get_json_params();
+        $data = array();
+        if ( isset( $p['date'] ) )       $data['date']       = sanitize_text_field( $p['date'] );
+        if ( isset( $p['label'] ) )      $data['label']      = sanitize_text_field( $p['label'] );
+        if ( isset( $p['vehicle_id'] ) ) $data['vehicle_id'] = (int) $p['vehicle_id'];
+        $wpdb->update( rc_table('holidays'), $data, array( 'id' => (int) $request['id'] ) );
+        return rest_ensure_response( array( 'success' => true ) );
     }
     public function destroy( $request ) {
         global $wpdb;
