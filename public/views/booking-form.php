@@ -147,38 +147,45 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </div>
                 </div>
                 <span class="rc-error-msg" id="rc-transport-error"></span>
-                <div class="rc-transport-table-wrap" id="rc-transport-fields">
-                    <table class="rc-transport-table">
-                        <thead><tr><th></th><th>航空会社</th><th>便 名</th><th>予定日時</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td class="rc-transport-label">到着便</td>
-                                <td><input type="text" name="arrival_airline" class="rc-input rc-input-sm" placeholder=""></td>
-                                <td><input type="text" name="arrival_flight" class="rc-input rc-input-sm" placeholder=""></td>
-                                <td class="rc-transport-datetime">
-                                    <input type="date" name="arrival_date" class="rc-input rc-input-sm">
-                                    <span class="rc-transport-time-group">
-                                        <select name="arrival_hour" class="rc-select rc-select-sm"><option value="">--</option></select>
-                                        <span class="rc-transport-colon">:</span>
-                                        <select name="arrival_min" class="rc-select rc-select-sm"><option value="">--</option></select>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="rc-transport-label">出発便</td>
-                                <td><input type="text" name="departure_airline" class="rc-input rc-input-sm" placeholder=""></td>
-                                <td><input type="text" name="departure_flight" class="rc-input rc-input-sm" placeholder=""></td>
-                                <td class="rc-transport-datetime">
-                                    <input type="date" name="departure_date" class="rc-input rc-input-sm">
-                                    <span class="rc-transport-time-group">
-                                        <select name="departure_hour" class="rc-select rc-select-sm"><option value="">--</option></select>
-                                        <span class="rc-transport-colon">:</span>
-                                        <select name="departure_min" class="rc-select rc-select-sm"><option value="">--</option></select>
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="rc-transport-fields">
+                    <div class="rc-flight-card">
+                        <div class="rc-flight-card-header">✈ 到着便</div>
+                        <div class="rc-flight-card-body">
+                            <div class="rc-form-row">
+                                <div class="rc-form-group"><label class="rc-label">航空会社</label><input type="text" name="arrival_airline" class="rc-input" placeholder="例: ANA"></div>
+                                <div class="rc-form-group"><label class="rc-label">便名</label><input type="text" name="arrival_flight" class="rc-input" placeholder="例: NH123"></div>
+                            </div>
+                            <div class="rc-form-row">
+                                <div class="rc-form-group"><label class="rc-label">予定日</label><input type="date" name="arrival_date" class="rc-input"></div>
+                                <div class="rc-form-group"><label class="rc-label">予定時刻</label>
+                                    <div class="rc-time-inline">
+                                        <select name="arrival_hour" class="rc-select"><option value="">--</option></select>
+                                        <span class="rc-time-colon">:</span>
+                                        <select name="arrival_min" class="rc-select"><option value="">--</option></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rc-flight-card">
+                        <div class="rc-flight-card-header">✈ 出発便</div>
+                        <div class="rc-flight-card-body">
+                            <div class="rc-form-row">
+                                <div class="rc-form-group"><label class="rc-label">航空会社</label><input type="text" name="departure_airline" class="rc-input" placeholder="例: JAL"></div>
+                                <div class="rc-form-group"><label class="rc-label">便名</label><input type="text" name="departure_flight" class="rc-input" placeholder="例: JL456"></div>
+                            </div>
+                            <div class="rc-form-row">
+                                <div class="rc-form-group"><label class="rc-label">予定日</label><input type="date" name="departure_date" class="rc-input"></div>
+                                <div class="rc-form-group"><label class="rc-label">予定時刻</label>
+                                    <div class="rc-time-inline">
+                                        <select name="departure_hour" class="rc-select"><option value="">--</option></select>
+                                        <span class="rc-time-colon">:</span>
+                                        <select name="departure_min" class="rc-select"><option value="">--</option></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
