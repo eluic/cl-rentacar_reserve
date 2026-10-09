@@ -820,11 +820,13 @@ app.get('/api/rentacar/v1/admin/options', (c) => {
   return c.json(options.map(o => ({ ...o, status: 'published' })))
 })
 app.post('/api/rentacar/v1/admin/options', async (c) => c.json({ id: 8, success: true }))
+app.put('/api/rentacar/v1/admin/options/:id', async (c) => c.json({ success: true }))
 app.delete('/api/rentacar/v1/admin/options/:id', (c) => c.json({ success: true }))
 
 // Admin Holidays
 app.get('/api/rentacar/v1/admin/holidays', (c) => c.json(mockHolidays))
 app.post('/api/rentacar/v1/admin/holidays', async (c) => c.json({ id: 8, success: true }))
+app.put('/api/rentacar/v1/admin/holidays/:id', async (c) => c.json({ success: true }))
 app.delete('/api/rentacar/v1/admin/holidays/:id', (c) => c.json({ success: true }))
 
 // Admin Mail Templates
